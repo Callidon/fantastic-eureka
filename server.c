@@ -38,6 +38,7 @@ void renvoi (int sock) {
     sleep(3);
 
     write(sock,buffer,strlen(buffer)+1);
+		//write(sock, sock, strlen(sock) + 1);
 
     printf("message envoye. \n");
 
@@ -108,6 +109,9 @@ main(int argc, char **argv) {
     /* initialisation de la file d'ecoute */
     listen(socket_descriptor,5);
 
+		int users[2];
+	int ind = 0;
+
     /* attente des connexions et traitement des donnees recues */
     for(;;) {
 
@@ -123,16 +127,26 @@ main(int argc, char **argv) {
 			exit(1);
 		}
 
-		/* traitement du message */
-		printf("reception d'un message.\n");
-		if(fork() == 0) {
-			renvoi(nouv_socket_descriptor);
+		users[ind] = nouv_socket_descriptor;
 
-			close(nouv_socket_descriptor);
-			exit(0);
-		} else {
-			close(nouv_socket_descriptor);
-		}
+		/* traitement du message */
+		/*printf("reception d'un message.\n");
+			if(fork() == 0) {
+				renvoi(nouv_socket_descriptor);
+
+				close(nouv_socket_descriptor);
+				exit(0);
+			} else {
+				close(nouv_socket_descriptor);
+			}*/
+		//renvoi(nouv_socket_descriptor);
+printf("my little descriptor %d \n", nouv_socket_descriptor);
+		printf("Nouveau client connecté %d \n", users[ind]);
+
+renvoi(users[ind]);
+	ind = 1;
+bool calzone = 1;
+		close(nouv_socket_descriptor);
 
     }
 
