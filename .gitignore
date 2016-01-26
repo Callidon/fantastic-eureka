@@ -34,3 +34,6 @@
 # Other
 client
 server
+examples/mutex
+examples/pthreads
+examples/semaphore
