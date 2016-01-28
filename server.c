@@ -7,6 +7,7 @@ Serveur à lancer avant le client
 #include <sys/socket.h>
 #include <netdb.h> 		/* pour hostent, servent */
 #include <string.h> 		/* pour bcopy, ... */
+#include "manager.c"
 #define TAILLE_MAX_NOM 256
 
 typedef struct sockaddr sockaddr;
@@ -109,8 +110,7 @@ main(int argc, char **argv) {
     /* initialisation de la file d'ecoute */
     listen(socket_descriptor,5);
 
-		int users[2];
-	int ind = 0;
+	int nb = 0;
 
     /* attente des connexions et traitement des donnees recues */
     for(;;) {
@@ -127,8 +127,6 @@ main(int argc, char **argv) {
 			exit(1);
 		}
 
-		users[ind] = nouv_socket_descriptor;
-
 		/* traitement du message */
 		/*printf("reception d'un message.\n");
 			if(fork() == 0) {
@@ -139,13 +137,13 @@ main(int argc, char **argv) {
 			} else {
 				close(nouv_socket_descriptor);
 			}*/
-		//renvoi(nouv_socket_descriptor);
-printf("my little descriptor %d \n", nouv_socket_descriptor);
-		printf("Nouveau client connecté %d \n", users[ind]);
+		printf("nouveau client connecté\n");
+		pthread_create(&storage.threads[nb], NULL, pth_add_client, (void *) (intptr_t) nouv_socket_descriptor);
+		nb++;
+		// WARNING si on ne termine pas l'échange comme attendu, ça échoue
+		// le client attend un message de réponse, il faut lui fournir
+		renvoi(nouv_socket_descriptor);
 
-renvoi(users[ind]);
-	ind = 1;
-bool calzone = 1;
 		close(nouv_socket_descriptor);
 
     }
