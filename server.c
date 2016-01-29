@@ -7,7 +7,7 @@ Serveur à lancer avant le client
 #include <sys/socket.h>
 #include <netdb.h> 		/* pour hostent, servent */
 #include <string.h> 		/* pour bcopy, ... */
-#include "manager.c"
+#include "pclient.h"
 #define TAILLE_MAX_NOM 256
 
 typedef struct sockaddr sockaddr;
@@ -16,13 +16,16 @@ typedef struct hostent hostent;
 typedef struct servent servent;
 
 /*------------------------------------------------------*/
-void renvoi (int sock) {
+void * renvoi (void * sock_data) {
 
+	int sock = (intptr_t) sock_data;
     char buffer[256];
     int longueur;
 
-    if ((longueur = read(sock, buffer, sizeof(buffer))) <= 0)
-    	return;
+    if ((longueur = read(sock, buffer, sizeof(buffer))) <= 0) {
+	    return;
+	}
+
 
     printf("message lu : %s \n", buffer);
 
@@ -42,6 +45,7 @@ void renvoi (int sock) {
 		//write(sock, sock, strlen(sock) + 1);
 
     printf("message envoye. \n");
+	close(socket);
 
     return;
 
@@ -138,14 +142,25 @@ main(int argc, char **argv) {
 				close(nouv_socket_descriptor);
 			}*/
 		printf("nouveau client connecté\n");
-		pthread_create(&storage.threads[nb], NULL, pth_add_client, (void *) (intptr_t) nouv_socket_descriptor);
+		printf("socket descriptor %d\n", nouv_socket_descriptor);
+		/*pthread_create(&storage.threads[nb], NULL, pclient_add, (void *) (intptr_t) nouv_socket_descriptor);
+		pthread_join(storage.threads[nb], NULL);*/
+		pthread_create(&storage.threads[nb], NULL, renvoi, (void *) (intptr_t) nouv_socket_descriptor);
+
 		nb++;
-		// WARNING si on ne termine pas l'échange comme attendu, ça échoue
-		// le client attend un message de réponse, il faut lui fournir
-		renvoi(nouv_socket_descriptor);
+		int i;
+		for(i = 0; i < nb; i++) {
+			pthread_join(storage.threads[i], NULL);
+			close(nouv_socket_descriptor);
+		}
+		// TODO
+		// Mettre close dans pclient_leave
+		// Mettre sémaphore : pclient_leave attend le sémaphore pour leave le client
+		// pclient add lock le sémaphore
+		// renvoi libère le sémaphore
 
-		close(nouv_socket_descriptor);
-
+		//pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
+		//close(nouv_socket_descriptor);
     }
 
 }
