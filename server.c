@@ -143,14 +143,15 @@ main(int argc, char **argv) {
 			}*/
 		printf("nouveau client connecté\n");
 		printf("socket descriptor %d\n", nouv_socket_descriptor);
-		/*pthread_create(&storage.threads[nb], NULL, pclient_add, (void *) (intptr_t) nouv_socket_descriptor);
-		pthread_join(storage.threads[nb], NULL);*/
-		pthread_create(&storage.threads[nb], NULL, renvoi, (void *) (intptr_t) nouv_socket_descriptor);
+		pthread_create(&storage.threads[nb], NULL, pclient_add, (void *) (intptr_t) nouv_socket_descriptor);
+		pthread_join(storage.threads[nb], NULL);
+		pthread_create(&storage.threads[nb], NULL, pclient_renvoi, (void *) (intptr_t) nouv_socket_descriptor);
 
 		nb++;
 		int i;
 		for(i = 0; i < nb; i++) {
 			pthread_join(storage.threads[i], NULL);
+			pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
 			close(nouv_socket_descriptor);
 		}
 		// TODO
@@ -159,7 +160,7 @@ main(int argc, char **argv) {
 		// pclient add lock le sémaphore
 		// renvoi libère le sémaphore
 
-		//pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
+		//
 		//close(nouv_socket_descriptor);
     }
 
