@@ -152,8 +152,15 @@ main(int argc, char **argv) {
 		for(i = 0; i < nb; i++) {
 			pthread_join(storage.threads[i], NULL);
 			pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
-			close(nouv_socket_descriptor);
+			//close(nouv_socket_descriptor);
 		}
+
+		// WORKFLOW
+		// client arrive (nouveau socket) => pclient_add(socket) (thread ou pas ?)
+		// on envoie un nouveau thread via threadpool pour deal avec les interactions du client
+		//	-> on attend un nouveau msf, on le décode et on deal with it (while true)
+		// à la réception du msg de déco, on appelle pclient_leave(socket) et on termine le thread dédié au client (+ notifs)
+
 		// TODO
 		// Mettre close dans pclient_leave
 		// Mettre sémaphore : pclient_leave attend le sémaphore pour leave le client
