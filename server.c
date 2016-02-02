@@ -141,19 +141,23 @@ main(int argc, char **argv) {
 			} else {
 				close(nouv_socket_descriptor);
 			}*/
+		array_client = malloc(sizeof(array_client_t));
+		array_client_init(array_client, 5);
+
 		printf("nouveau client connecté\n");
 		printf("socket descriptor %d\n", nouv_socket_descriptor);
-		pthread_create(&storage.threads[nb], NULL, pclient_add, (void *) (intptr_t) nouv_socket_descriptor);
-		pthread_join(storage.threads[nb], NULL);
-		pthread_create(&storage.threads[nb], NULL, pclient_renvoi, (void *) (intptr_t) nouv_socket_descriptor);
 
-		nb++;
+		int client_ind = pclient_add(nouv_socket_descriptor);
+		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, pclient_renvoi, (void *) (intptr_t) nouv_socket_descriptor);
+
 		int i;
-		for(i = 0; i < nb; i++) {
-			pthread_join(storage.threads[i], NULL);
+		for(i = 0; i < array_client->size; i++) {
+			pthread_join(array_client->clients[client_ind]->client_thread, NULL);
 			pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
 			//close(nouv_socket_descriptor);
 		}
+		array_client_free(array_client);
+		exit(0);
 
 		// WORKFLOW
 		// client arrive (nouveau socket) => pclient_add(socket) (thread ou pas ?)
