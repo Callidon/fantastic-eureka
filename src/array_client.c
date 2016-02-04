@@ -1,5 +1,8 @@
 #include "array_client.h"
 
+/*
+ * Initialise une collection de clients
+ */
 void array_client_init(array_client_t * array_client, size_t size) {
 	array_client->clients = malloc(sizeof(array_client_t) * size);
 	pthread_mutex_init(&array_client->lock, NULL);
@@ -7,6 +10,9 @@ void array_client_init(array_client_t * array_client, size_t size) {
 	array_client->count = 0;
 }
 
+/*
+ * Libère une collection de clients
+ */
 void array_client_free(array_client_t * array_client) {
 	int i;
 	pthread_mutex_lock(&array_client->lock);
@@ -19,27 +25,38 @@ void array_client_free(array_client_t * array_client) {
 	pthread_mutex_unlock(&array_client->lock);
 }
 
+/*
+ * Ajoute un client à une collection
+ */
 int array_client_add(array_client_t * array_client, int client_socket) {
 	pthread_mutex_lock(&array_client->lock);
+
 	// if the array is full
 	if(array_client->count == array_client->size) {
 		array_client->clients = realloc(array_client->clients, array_client->size * sizeof(client_t));
 		array_client->size *= 2;
 	}
+
 	client_t * new_client = malloc(sizeof(client_t));
 	new_client->socket = client_socket;
 	pthread_mutex_init(&new_client->lock, NULL);
+
 	array_client->clients[array_client->count] = new_client;
 	array_client->count++;
+
 	pthread_mutex_unlock(&array_client->lock);
-	return array_client->count;
+	return array_client->count - 1;
 }
 
+/*
+ * Supprime un client d'une collection
+ */
 int array_client_delete(array_client_t * array_client, int client_socket) {
 	int i;
 	int client_ind;
 	client_t * client;
 	pthread_mutex_lock(&array_client->lock);
+
 	// search for the client
 	for(i = 0; i < array_client->count; i++) {
 		if(array_client->clients[i]->socket == client_socket) {
@@ -49,11 +66,15 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 	}
 	free(client);
 	array_client->count--;
+
 	pthread_mutex_unlock(&array_client->lock);
 	array_client_compact(array_client, client_ind, array_client->count);
 	return client_ind;
 }
 
+/*
+ * Tasse une portion d'une collection de clients
+ */
 void array_client_compact(array_client_t * array_client, int start, int size) {
 	int i;
 	pthread_mutex_lock(&array_client->lock);

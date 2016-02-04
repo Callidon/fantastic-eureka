@@ -16,53 +16,16 @@ typedef struct hostent hostent;
 typedef struct servent servent;
 
 /*------------------------------------------------------*/
-void * renvoi (void * sock_data) {
-
-	int sock = (intptr_t) sock_data;
-    char buffer[256];
-    int longueur;
-
-    if ((longueur = read(sock, buffer, sizeof(buffer))) <= 0) {
-	    return;
-	}
-
-
-    printf("message lu : %s \n", buffer);
-
-    buffer[0] = 'R';
-    buffer[1] = 'E';
-    buffer[longueur] = '#';
-    buffer[longueur+1] ='\0';
-
-    printf("message apres traitement : %s \n", buffer);
-
-    printf("renvoi du message traite.\n");
-
-    /* mise en attente du prgramme pour simuler un delai de transmission */
-    sleep(3);
-
-    write(sock,buffer,strlen(buffer)+1);
-		//write(sock, sock, strlen(sock) + 1);
-
-    printf("message envoye. \n");
-	close(socket);
-
-    return;
-
-}
-/*------------------------------------------------------*/
-
-/*------------------------------------------------------*/
 main(int argc, char **argv) {
 
-    int 		socket_descriptor, 		/* descripteur de socket */
-			nouv_socket_descriptor, 	/* [nouveau] descripteur de socket */
-			longueur_adresse_courante; 	/* longueur d'adresse courante d'un client */
-    sockaddr_in 	adresse_locale, 		/* structure d'adresse locale*/
-			adresse_client_courant; 	/* adresse client courant */
-    hostent*		ptr_hote; 			/* les infos recuperees sur la machine hote */
-    servent*		ptr_service; 			/* les infos recuperees sur le service de la machine */
-    char 		machine[TAILLE_MAX_NOM+1]; 	/* nom de la machine locale */
+    int socket_descriptor, 		/* descripteur de socket */
+		nouv_socket_descriptor, 	/* [nouveau] descripteur de socket */
+		longueur_adresse_courante; 	/* longueur d'adresse courante d'un client */
+    sockaddr_in adresse_locale, 		/* structure d'adresse locale*/
+	adresse_client_courant; 	/* adresse client courant */
+    hostent* ptr_hote; 			/* les infos recuperees sur la machine hote */
+    servent* ptr_service; 			/* les infos recuperees sur le service de la machine */
+    char machine[TAILLE_MAX_NOM+1]; 	/* nom de la machine locale */
 
     gethostname(machine,TAILLE_MAX_NOM);		/* recuperation du nom de la machine */
 
@@ -114,8 +77,6 @@ main(int argc, char **argv) {
     /* initialisation de la file d'ecoute */
     listen(socket_descriptor,5);
 
-	int nb = 0;
-
     /* attente des connexions et traitement des donnees recues */
     for(;;) {
 
@@ -131,16 +92,6 @@ main(int argc, char **argv) {
 			exit(1);
 		}
 
-		/* traitement du message */
-		/*printf("reception d'un message.\n");
-			if(fork() == 0) {
-				renvoi(nouv_socket_descriptor);
-
-				close(nouv_socket_descriptor);
-				exit(0);
-			} else {
-				close(nouv_socket_descriptor);
-			}*/
 		array_client = malloc(sizeof(array_client_t));
 		array_client_init(array_client, 5);
 
@@ -151,10 +102,9 @@ main(int argc, char **argv) {
 		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, pclient_renvoi, (void *) (intptr_t) nouv_socket_descriptor);
 
 		int i;
-		for(i = 0; i < array_client->size; i++) {
+		for(i = 0; i < array_client->count; i++) {
 			pthread_join(array_client->clients[client_ind]->client_thread, NULL);
 			pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
-			//close(nouv_socket_descriptor);
 		}
 		array_client_free(array_client);
 		exit(0);
@@ -164,15 +114,6 @@ main(int argc, char **argv) {
 		// on envoie un nouveau thread via threadpool pour deal avec les interactions du client
 		//	-> on attend un nouveau msf, on le décode et on deal with it (while true)
 		// à la réception du msg de déco, on appelle pclient_leave(socket) et on termine le thread dédié au client (+ notifs)
-
-		// TODO
-		// Mettre close dans pclient_leave
-		// Mettre sémaphore : pclient_leave attend le sémaphore pour leave le client
-		// pclient add lock le sémaphore
-		// renvoi libère le sémaphore
-
-		//
-		//close(nouv_socket_descriptor);
     }
 
 }

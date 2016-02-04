@@ -16,7 +16,7 @@ typedef struct servent 		servent;
 
 int main(int argc, char **argv) {
 
-    int 	socket_descriptor, 	/* descripteur de socket */
+    int socket_descriptor, 	/* descripteur de socket */
 		longueur; 		/* longueur d'un buffer utilisé */
     sockaddr_in adresse_locale; 	/* adresse de socket local */
     hostent *	ptr_host; 		/* info sur une machine hote */
