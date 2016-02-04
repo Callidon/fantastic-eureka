@@ -14,9 +14,9 @@ void array_client_free(array_client_t * array_client) {
 	for(i = 0; i < array_client->count; i++) {
 		free(array_client->clients[i]);
 	}
-	pthread_mutex_unlock(&array_client->lock);
 	// cleanup the rest of the struct
 	free(array_client->clients);
+	pthread_mutex_unlock(&array_client->lock);
 }
 
 int array_client_add(array_client_t * array_client, int client_socket) {
@@ -29,8 +29,8 @@ int array_client_add(array_client_t * array_client, int client_socket) {
 	client_t * new_client = malloc(sizeof(client_t));
 	new_client->socket = client_socket;
 	pthread_mutex_init(&new_client->lock, NULL);
-	array_client->count++;
 	array_client->clients[array_client->count] = new_client;
+	array_client->count++;
 	pthread_mutex_unlock(&array_client->lock);
 	return array_client->count;
 }
@@ -47,12 +47,10 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 			client_ind = i;
 		}
 	}
-	// assure that the client is free to use
-	pthread_mutex_lock(&client->lock);
-	pthread_mutex_unlock(&client->lock);
 	free(client);
-	array_client_compact(array_client, client_ind, array_client->count);
+	array_client->count--;
 	pthread_mutex_unlock(&array_client->lock);
+	array_client_compact(array_client, client_ind, array_client->count);
 	return client_ind;
 }
 
