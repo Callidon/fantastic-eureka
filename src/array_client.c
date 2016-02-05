@@ -1,5 +1,4 @@
 #include "array_client.h"
-
 /*
  * Initialise une collection de clients
  */
@@ -89,10 +88,10 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 		}
 	}
 	free(client);
-	array_client->count--;
 
-	pthread_mutex_unlock(&array_client->lock);
 	array_client_compact(array_client, client_ind, array_client->count);
+	array_client->count--;
+	pthread_mutex_unlock(&array_client->lock);
 	return client_ind;
 }
 
@@ -101,9 +100,7 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
  */
 void array_client_compact(array_client_t * array_client, int start, int size) {
 	int i;
-	pthread_mutex_lock(&array_client->lock);
 	for(i = start; i < size - 1; i++) {
 		array_client->clients[i] = array_client->clients[i+1];
 	}
-	pthread_mutex_unlock(&array_client->lock);
 }

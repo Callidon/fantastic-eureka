@@ -44,7 +44,7 @@ void * server_handler(void * client_datas) {
 			break;
 		// login
 		case 1 :
-			client_ind = array_client_setName(datas->array_client, message->username);
+			client_ind = array_client_setName(datas->array_client, datas->socket, message->username);
 			// broadcast d'un message pour annoncer la connexion du client
 			// for dans datas->array_clients
 				// write du message de type 0 dans le socket courant
