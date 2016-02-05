@@ -1,6 +1,6 @@
 LDLIBS = -pthread
 CFLAGS = -I./includes
-SOURCES = src/pclient.c src/array_client.c src/decoder.c 
+SOURCES = src/handler.c src/array_client.c src/decoder.c 
 .PHONY: clean
 
 client:

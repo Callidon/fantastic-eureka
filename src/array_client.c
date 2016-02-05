@@ -18,11 +18,13 @@ void array_client_free(array_client_t * array_client) {
 	pthread_mutex_lock(&array_client->lock);
 	// free all the clients
 	for(i = 0; i < array_client->count; i++) {
+		pthread_exit(&array_client->clients[i]->client_thread);
 		free(array_client->clients[i]);
 	}
 	// cleanup the rest of the struct
 	free(array_client->clients);
 	pthread_mutex_unlock(&array_client->lock);
+	free(array_client);
 }
 
 /*
@@ -46,6 +48,28 @@ int array_client_add(array_client_t * array_client, int client_socket) {
 
 	pthread_mutex_unlock(&array_client->lock);
 	return array_client->count - 1;
+}
+
+/*
+ * Set le nom d'un client
+ */
+int array_client_setName(array_client_t * array_client, int client_socket, char * name) {
+	int i;
+	int client_ind;
+	pthread_mutex_lock(&array_client->lock);
+
+	// search for the client
+	for(i = 0; i < array_client->count; i++) {
+		if(array_client->clients[i]->socket == client_socket) {
+			pthread_mutex_lock(&array_client->clients[i]->lock);
+			array_client->clients[i]->username = strdup(name);
+			pthread_mutex_unlock(&array_client->clients[i]->lock);
+			client_ind = i;
+		}
+	}
+
+	pthread_mutex_unlock(&array_client->lock);
+	return client_ind;
 }
 
 /*

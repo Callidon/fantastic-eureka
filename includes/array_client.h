@@ -7,10 +7,12 @@
 
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
 
 // Structure représentant un client
 typedef struct {
 	int socket;
+	char * username;
 	pthread_t client_thread;
 	pthread_mutex_t lock;
 } client_t;
@@ -39,8 +41,14 @@ void array_client_free(array_client_t * array_client);
 int array_client_add(array_client_t * array_client, int client_socket);
 
 /*
+ * Set le nom d'un client
+ */
+int array_client_setName(array_client_t * array_client, int client_socket, char * name);
+
+/*
  * Supprime un client d'une collection
  */
+ // TODO trouver pourquoi ça foire quand il y a deux clients en même temps ... wesh
 int array_client_delete(array_client_t * array_client, int client_socket);
 
 /*

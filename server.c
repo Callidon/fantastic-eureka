@@ -7,13 +7,22 @@ Serveur à lancer avant le client
 #include <sys/socket.h>
 #include <netdb.h> 		/* pour hostent, servent */
 #include <string.h> 		/* pour bcopy, ... */
-#include "pclient.h"
+#include <signal.h>
+#include "handler.h"
 #define TAILLE_MAX_NOM 256
 
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 typedef struct hostent hostent;
 typedef struct servent servent;
+
+array_client_t * array_client;
+
+// Fonction d'arrêt du serveur
+void stop() {
+	array_client_free(array_client);
+	exit(0);
+}
 
 /*------------------------------------------------------*/
 main(int argc, char **argv) {
@@ -26,6 +35,11 @@ main(int argc, char **argv) {
     hostent* ptr_hote; 			/* les infos recuperees sur la machine hote */
     servent* ptr_service; 			/* les infos recuperees sur le service de la machine */
     char machine[TAILLE_MAX_NOM+1]; 	/* nom de la machine locale */
+
+	signal(SIGINT, stop);
+
+	array_client = malloc(sizeof(array_client_t));
+	array_client_init(array_client, 5);
 
     gethostname(machine,TAILLE_MAX_NOM);		/* recuperation du nom de la machine */
 
@@ -42,25 +56,9 @@ main(int argc, char **argv) {
     adresse_locale.sin_family		= ptr_hote->h_addrtype; 	/* ou AF_INET */
     adresse_locale.sin_addr.s_addr	= INADDR_ANY; 			/* ou AF_INET */
 
-    /* 2 facons de definir le service que l'on va utiliser a distance */
-    /* (commenter l'une ou l'autre des solutions) */
-
-    /*-----------------------------------------------------------*/
-    /* SOLUTION 1 : utiliser un service existant, par ex. "irc" */
-    /*
-    if ((ptr_service = getservbyname("irc","tcp")) == NULL) {
-		perror("erreur : impossible de recuperer le numero de port du service desire.");
-		exit(1);
-    }
-    adresse_locale.sin_port = htons(ptr_service->s_port);
-    */
-    /*-----------------------------------------------------------*/
-    /* SOLUTION 2 : utiliser un nouveau numero de port */
     adresse_locale.sin_port = htons(5001);
-    /*-----------------------------------------------------------*/
 
-    printf("numero de port pour la connexion au serveur : %d \n",
-		   ntohs(adresse_locale.sin_port) /*ntohs(ptr_service->s_port)*/);
+    printf("numero de port pour la connexion au serveur : %d \n", ntohs(adresse_locale.sin_port));
 
     /* creation de la socket */
     if ((socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -92,28 +90,14 @@ main(int argc, char **argv) {
 			exit(1);
 		}
 
-		array_client = malloc(sizeof(array_client_t));
-		array_client_init(array_client, 5);
-
 		printf("nouveau client connecté\n");
 		printf("socket descriptor %d\n", nouv_socket_descriptor);
 
-		int client_ind = pclient_add(nouv_socket_descriptor);
-		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, pclient_renvoi, (void *) (intptr_t) nouv_socket_descriptor);
-
-		int i;
-		for(i = 0; i < array_client->count; i++) {
-			pthread_join(array_client->clients[client_ind]->client_thread, NULL);
-			pclient_leave((void *) (intptr_t) nouv_socket_descriptor);
-		}
-		array_client_free(array_client);
-		exit(0);
-
-		// WORKFLOW
-		// client arrive (nouveau socket) => pclient_add(socket) (thread ou pas ?)
-		// on envoie un nouveau thread via threadpool pour deal avec les interactions du client
-		//	-> on attend un nouveau msf, on le décode et on deal with it (while true)
-		// à la réception du msg de déco, on appelle pclient_leave(socket) et on termine le thread dédié au client (+ notifs)
+		int client_ind = array_client_add(array_client, nouv_socket_descriptor);
+		client_datas_t * datas = malloc(sizeof(client_datas_t));
+		datas->socket = nouv_socket_descriptor;
+		datas->array_client = array_client;
+		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, server_handler, (void *) datas);
     }
 
 }

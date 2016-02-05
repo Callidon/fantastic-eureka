@@ -1,5 +1,5 @@
-#ifndef PCLIENT_H
-#define PCLIENT_H
+#ifndef HANDLER_H
+#define HANDLER_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,14 +9,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
+#include "decoder.h"
 #include "array_client.h"
 
-array_client_t * array_client;
+typedef struct {
+	int socket;
+	array_client_t * array_client;
+} client_datas_t;
 
-int pclient_add(int sock_data);
-
-void * pclient_renvoi(void * sock_data);
-
-void * pclient_leave(void * sock_data);
+void * server_handler(void * client_datas);
 
 #endif
