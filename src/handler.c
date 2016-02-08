@@ -9,9 +9,6 @@ void * server_handler(void * client_datas) {
     int longueur;
 	int client_ind;
 
-	// TODO mettre le décodage dans un for(;;)
-	// TODO coder les différents cas
-
 	for(;;) {
 		// lecture du message
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
@@ -89,5 +86,6 @@ void * server_handler(void * client_datas) {
 				write(destinataire->socket, msg, strlen(msg));
 				break;
 		}
+		// appel du destructeur sur message
 	}
 }
