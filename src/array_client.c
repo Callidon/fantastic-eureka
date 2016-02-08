@@ -34,8 +34,8 @@ int array_client_add(array_client_t * array_client, int client_socket) {
 
 	// if the array is full
 	if(array_client->count == array_client->size) {
-		array_client->clients = realloc(array_client->clients, array_client->size * sizeof(client_t));
 		array_client->size *= 2;
+		array_client->clients = realloc(array_client->clients, array_client->size * sizeof(client_t));
 	}
 
 	client_t * new_client = malloc(sizeof(client_t));
