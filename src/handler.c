@@ -5,9 +5,9 @@ void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
 
     char buffer[250];
-	char * msg;
+		char * msg;
     int longueur;
-	int client_ind;
+		int client_ind;
 
 	// TODO mettre le décodage dans un for(;;)
 	// TODO coder les différents cas

@@ -9,7 +9,7 @@
 message :
 code;datas
 
-0 = broadcast => texte
+0 = multicast => texte
 1 = login => username;password
 2 = leave => username
 3 = msg => username;texte;
@@ -41,7 +41,32 @@ typedef struct {
  */
 message_parsed_t * decode(char* msg);
 
+/*
+ * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
+ */
+char* generateMulticast(char* msg);
+
+/*
+ * Methode qui renvoie un message de login sous forme de chaine a partir des parametres remplis par le client
+ */
+char* generateLogin(char* username, char* password);
+
+/*
+ * Methode qui renvoie un message de deconnexionsous forme de chaine a partir des parametres remplis par le client
+ */
+char* generateLeave(char* username);
+
+/*
+ * Methode qui renvoie un message pour tout les autres clients sous forme de chaine a partir des parametres remplis par le client
+ */
+char* generateMsg(char* username ,char* msg);
+
+/*
+ * Methode qui renvoie un message privé pour un autre client sous forme de chaine a partir des parametres remplis par le client
+ */
+char* generateWhisp(char* username, char* destinataire, char* msg);
+
+
 // TODO réparer le parseur
-// TODO créer des fonctions pour générer les différents types de messages
 
 #endif
