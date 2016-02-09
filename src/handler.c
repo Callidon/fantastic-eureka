@@ -9,6 +9,7 @@ void * server_handler(void * client_datas) {
     int longueur;
 		int client_ind;
 
+
 	for(;;) {
 		// lecture du message
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
