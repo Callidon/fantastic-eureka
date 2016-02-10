@@ -105,16 +105,18 @@ main(int argc, char **argv) {
 		}
 
 		// on signale au client qu'il est connecté
-		char * login_msg;
-		// formattage d'un message de type 1
+		// TODO régler problème sur le rôle du message de login
+		char * login_msg = generateLogin(array_client->clients[client_ind]->username, "");
 		write(nouv_socket_descriptor, login_msg, strlen(login_msg));
 
 		// multicast aux autres users pour leur signaler l'arrivée du nouvel user
 		int i;
+		char * multicast_msg = generateMulticast(strcat(array_client->clients[client_ind]->username, " has join the channel"));
 		for(i = 0; i < array_client->count; i++) {
-			char * multicast_msg;
-			// formattage d'un client de type 0
-			write(array_client->clients[i]->socket, multicast_msg, strlen(multicast_msg));
+			if(array_client->clients[i]->socket != datas->socket) {
+				write(datas->array_client->clients[i]->socket, multicast_msg, strlen(multicast_msg));
+			}
+			free(multicast_msg);
 		}
     }
 
