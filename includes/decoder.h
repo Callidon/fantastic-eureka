@@ -66,6 +66,10 @@ char* generateMsg(char* username ,char* msg);
  */
 char* generateWhisp(char* username, char* destinataire, char* msg);
 
+/*
+ * Méthode libérant une structure message_parsed_t
+ */
+void message_parsed_free(message_parsed_t * message);
 
 // TODO réparer le parseur
 

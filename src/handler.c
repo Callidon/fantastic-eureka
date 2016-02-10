@@ -3,12 +3,11 @@
 
 void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
-
     char buffer[250];
-		char * msg;
-    int longueur;
-		int client_ind;
-
+	char * response;
+    int i,
+		longueur,
+		client_ind;
 
 	for(;;) {
 		// lecture du message
@@ -26,7 +25,6 @@ void * server_handler(void * client_datas) {
 				// TODO à supprimer
 				printf("DEBUG multicast - message lu : %s \n", buffer);
 				// on transmet le message à chaque client
-				int i;
 				for(i = 0; i < datas->array_client->count; i++) {
 					write(datas->array_client->clients[i]->socket, buffer, strlen(buffer));
 				}
@@ -37,10 +35,11 @@ void * server_handler(void * client_datas) {
 				printf("DEBUG login - message lu : %s \n", buffer);
 				client_ind = array_client_setName(datas->array_client, datas->socket, message->username);
 				// multicast d'un message pour annoncer la connexion du client
-				int i;
+				response = generateMulticast(strcat(message->username, " has join the channel"));
 				for(i = 0; i < datas->array_client->count; i++) {
-					// formattage du message de type 0
-					write(datas->array_client->clients[i]->socket, msg, strlen(msg));
+					if(datas->array_client->clients[i]->socket != datas->socket) {
+						write(datas->array_client->clients[i]->socket, response, strlen(response));
+					}
 				}
 				break;
 			// leave
@@ -52,10 +51,11 @@ void * server_handler(void * client_datas) {
 				free(datas);
 
 				// multicast d'un message pour annoncer le départ du client
-				int i;
+				response = generateMulticast(strcat(message->username, " has leave the channel"));
 				for(i = 0; i < datas->array_client->count; i++) {
-					// formattage du message de type 0
-					write(datas->array_client->clients[i]->socket, msg, strlen(msg));
+					if(datas->array_client->clients[i]->socket != datas->socket) {
+						write(datas->array_client->clients[i]->socket, response, strlen(response));
+					}
 				}
 				break;
 			// message
@@ -63,10 +63,11 @@ void * server_handler(void * client_datas) {
 				// TODO à supprimer
 				printf("DEBUG message - message lu : %s \n", buffer);
 				// transmission du message aux autres clients
-				int i;
+				response = generateMsg(message->username, message->text);
 				for(i = 0; i < datas->array_client->count; i++) {
-					// formattage du message de type 3
-					write(datas->array_client->clients[i]->socket, msg, strlen(msg));
+					if(datas->array_client->clients[i]->socket != datas->socket) {
+						write(datas->array_client->clients[i]->socket, response, strlen(response));
+					}
 				}
 				break;
 			//  message privé
@@ -74,19 +75,20 @@ void * server_handler(void * client_datas) {
 				// TODO à supprimer
 				printf("DEBUG mp - message lu : %s \n", buffer);
 				// recherche du destinataire via son username
-				int i;
 				client_t * destinataire;
-				while(i = 0; i < datas->array_client->count; i++) {
-					if(strcmp(datas->array_client->clients[i]->username, /*message->username*/)) {
+				for(i = 0; i < datas->array_client->count; i++) {
+					if(strcmp(datas->array_client->clients[i]->username, message->username)) {
 						destinataire = datas->array_client->clients[i];
 						break;
 					}
 				}
 				// envoi du message au destinataire
-				// formattage d'un message de type 4
-				write(destinataire->socket, msg, strlen(msg));
+				response = generateWhisp(message->username, message->destinataire, message->text);
+				write(destinataire->socket, response, strlen(response));
 				break;
 		}
-		// appel du destructeur sur message
+		// nettoyage des variables
+		free(response);
+		message_parsed_free(message);
 	}
 }
