@@ -99,10 +99,7 @@ main(int argc, char **argv) {
 		datas->array_client = array_client;
 
 		// lancement du handler chargé de gérer les interactions du nouveau client
-		if(pthread_create(&array_client->clients[client_ind]->client_thread, NULL, server_handler, (void *) datas)) {
-			perror("Erreur : Impossible de créer le thread pour le handler du client");
-			exit(1);
-		}
+		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, server_handler, (void *) datas);
 
 		// on signale au client qu'il est connecté
 		// TODO régler problème sur le rôle du message de login
@@ -114,7 +111,7 @@ main(int argc, char **argv) {
 		char * multicast_msg = generateMulticast(strcat(array_client->clients[client_ind]->username, " has join the channel"));
 		for(i = 0; i < array_client->count; i++) {
 			if(array_client->clients[i]->socket != datas->socket) {
-				write(datas->array_client->clients[i]->socket, multicast_msg, strlen(multicast_msg));
+				write(array_client->clients[i]->socket, multicast_msg, strlen(multicast_msg));
 			}
 			free(multicast_msg);
 		}
