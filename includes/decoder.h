@@ -23,11 +23,12 @@ Exemple de message : 1;Pierre;123456  3;Thomas;Bonjour
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "config.h"
 
 #ifndef DECODER_H
 #define DECODER_H
 
-// Enum représentant le type d'un message 
+// Enum représentant le type d'un message
 typedef enum {
 	Multicast,
 	Login,

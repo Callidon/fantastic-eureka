@@ -9,6 +9,7 @@ client <adresse-serveur> <message-a-transmettre>
 #include <netdb.h>
 #include <string.h>
 #include <signal.h>
+#include "config.h"
 
 typedef struct sockaddr 	sockaddr;
 typedef struct sockaddr_in 	sockaddr_in;
@@ -24,14 +25,24 @@ void stop() {
     printf("connexion avec le serveur fermee, fin du programme.\n");
 }
 
+// Fonction de saisie de texte pour un message
+void text_input(char * message) {
+	fgets(message, sizeof(message), stdin);
+	// suppresion d'un éventuel retour chariot
+	char *p = strchr(message, '\n');
+    if(p) {
+		*p = 0;
+	}
+}
+
 int main(int argc, char **argv) {
 
     int longueur; 		/* longueur d'un buffer utilisé */
     sockaddr_in adresse_locale; 	/* adresse de socket local */
     hostent *	ptr_host; 		/* info sur une machine hote */
     servent *	ptr_service; 		/* info sur service */
-    char buffer[256];	/* buffer de réception des messages venant du serveur */
-	char message[256];	/* message envoyé */
+    char buffer[MAX_BUFFER_SIZE];	/* buffer de réception des messages venant du serveur */
+	char message[MAX_BUFFER_SIZE];	/* message envoyé */
     char *	prog; 			/* nom du programme */
     char *	host; 			/* nom de la machine distante */
 
@@ -43,22 +54,10 @@ int main(int argc, char **argv) {
     prog = argv[0];
     host = argv[1];
 
-	// saisie du message
-	printf("Saisissez votre message :\n");
-	fgets(message, sizeof(message), stdin);
-	// suppresion d'un éventuel retour chariot
-	char *p = strchr(message, '\n');
-    if(p) {
-		*p = 0;
-	}
-
-
 	// bind du CTRl+C pour arrêter proprement le client
 	signal(SIGINT, stop);
 
-    printf("nom de l'executable : %s \n", prog);
     printf("adresse du serveur  : %s \n", host);
-    printf("message envoye      : %s \n", message);
 
     if ((ptr_host = gethostbyname(host)) == NULL) {
 		perror("erreur : impossible de trouver le serveur a partir de son adresse.");
@@ -85,22 +84,17 @@ int main(int argc, char **argv) {
 		exit(1);
     }
 
-    printf("connexion etablie avec le serveur. \n");
-
-    printf("envoi d'un message au serveur. \n");
-
-    /* envoi du message vers le serveur */
-    if ((write(socket_descriptor, message, strlen(message))) < 0) {
-		perror("erreur : impossible d'ecrire le message destine au serveur.");
-		exit(1);
-    }
-
-    printf("message envoye au serveur. \n");
 
     /* lecture des messages en provenance du serveur */
     while((longueur = read(socket_descriptor, buffer, sizeof(buffer))) > 0) {
-		printf("message du serveur du serveur : \n");
-		printf("%s\n", buffer);
+		printf("message reçu du serveur : %s\n", buffer);
+		printf("Saisissez votre message :\n");
+		text_input(message);
+		/* envoi du message vers le serveur */
+		if ((write(socket_descriptor, message, strlen(message))) < 0) {
+			perror("erreur : impossible d'ecrire le message destine au serveur.");
+			exit(1);
+		}
     }
-
+	exit(0);
 }

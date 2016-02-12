@@ -2,12 +2,14 @@
  * Structures et fonctions relatives à une collection de clients
  * Auteurs : Pierre Gaultier & Thomas Minier
  */
+ #include <stdlib.h>
+ #include <pthread.h>
+ #include <string.h>
+ #include "config.h"
+ 
 #ifndef ARRAY_CLIENT_H
 #define ARRAY_CLIENT_H
 
-#include <stdlib.h>
-#include <pthread.h>
-#include <string.h>
 
 // Structure représentant un client
 typedef struct {

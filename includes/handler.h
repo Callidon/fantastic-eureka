@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
+#include "config.h"
 #include "decoder.h"
 #include "array_client.h"
 

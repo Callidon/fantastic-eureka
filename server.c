@@ -8,8 +8,8 @@ Serveur à lancer avant le client
 #include <netdb.h> 		/* pour hostent, servent */
 #include <string.h> 		/* pour bcopy, ... */
 #include <signal.h>
+#include "config.h"
 #include "handler.h"
-#define TAILLE_MAX_NOM 256
 
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
@@ -18,10 +18,16 @@ typedef struct servent servent;
 
 array_client_t * array_client;
 
-// Fonction d'arrêt du serveur
+// Fonction d'arrêt normale du serveur
 void stop() {
 	array_client_free(array_client);
 	exit(0);
+}
+
+// Fonction d'arrêt du serveur en cas d'erreur
+void error_stop() {
+	array_client_free(array_client);
+	exit(1);
 }
 
 /*------------------------------------------------------*/
@@ -34,7 +40,7 @@ main(int argc, char **argv) {
 	adresse_client_courant; 	/* adresse client courant */
     hostent* ptr_hote; 			/* les infos recuperees sur la machine hote */
     servent* ptr_service; 			/* les infos recuperees sur le service de la machine */
-    char machine[TAILLE_MAX_NOM+1]; 	/* nom de la machine locale */
+    char machine[MAX_BUFFER_SIZE+1]; 	/* nom de la machine locale */
 
 	// bind du CTRl+C pour arrêter proprement le serveur
 	signal(SIGINT, stop);
@@ -42,12 +48,12 @@ main(int argc, char **argv) {
 	array_client = malloc(sizeof(array_client_t));
 	array_client_init(array_client, 5);
 
-    gethostname(machine,TAILLE_MAX_NOM);		/* recuperation du nom de la machine */
+    gethostname(machine,MAX_BUFFER_SIZE);		/* recuperation du nom de la machine */
 
     /* recuperation de la structure d'adresse en utilisant le nom */
     if ((ptr_hote = gethostbyname(machine)) == NULL) {
 		perror("erreur : impossible de trouver le serveur a partir de son nom.");
-		exit(1);
+		error_stop();
     }
 
     /* initialisation de la structure adresse_locale avec les infos recuperees */
@@ -63,17 +69,17 @@ main(int argc, char **argv) {
     /* creation de la socket */
     if ((socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("Erreur : impossible de creer la socket de connexion avec le client.");
-		exit(1);
+		error_stop();
     }
 
     /* association du socket socket_descriptor à la structure d'adresse adresse_locale */
     if ((bind(socket_descriptor, (sockaddr*)(&adresse_locale), sizeof(adresse_locale))) < 0) {
 		perror("Erreur : impossible de lier la socket a l'adresse de connexion.");
-		exit(1);
+		error_stop();
     }
 
     /* initialisation de la file d'ecoute */
-    listen(socket_descriptor,5);
+    listen(socket_descriptor, 5);
 
     /* attente des connexions et traitement des donnees recues */
     for(;;) {
@@ -87,7 +93,7 @@ main(int argc, char **argv) {
 			       &longueur_adresse_courante))
 			 < 0) {
 			perror("erreur : impossible d'accepter la connexion avec le client.");
-			exit(1);
+			error_stop();
 		}
 		// TODO à supprimer
 		printf("DEBUG - nouveau client connecté\n");
@@ -99,10 +105,12 @@ main(int argc, char **argv) {
 		datas->array_client = array_client;
 
 		// lancement du handler chargé de gérer les interactions du nouveau client
-		pthread_create(&array_client->clients[client_ind]->client_thread, NULL, server_handler, (void *) datas);
+		if(pthread_create(&array_client->clients[client_ind]->client_thread, NULL, server_handler, (void *) datas) < 0) {
+			perror("Erreur - impossible de créer le thread pour gérer la connexion avec le client");
+			error_stop();
+		}
 
 		// on signale au client qu'il est connecté
-		// TODO régler problème sur le rôle du message de login
 		char * login_msg = generateLogin("user", "password");
 		write(nouv_socket_descriptor, login_msg, strlen(login_msg));
 

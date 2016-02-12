@@ -3,7 +3,7 @@
 
 void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
-    char buffer[256];
+    char buffer[MAX_BUFFER_SIZE];
 	char * response;
     int i,
 		longueur,
