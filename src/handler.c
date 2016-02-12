@@ -3,7 +3,7 @@
 
 void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
-    char buffer[250];
+    char buffer[256];
 	char * response;
     int i,
 		longueur,
@@ -26,7 +26,7 @@ void * server_handler(void * client_datas) {
 				printf("DEBUG multicast - message lu : %s \n", buffer);
 				// on transmet le message à chaque client
 				for(i = 0; i < datas->array_client->count; i++) {
-					write(datas->array_client->clients[i]->socket, buffer, strlen(buffer));
+					write(datas->array_client->clients[i]->socket, buffer, sizeof(buffer));
 				}
 				break;
 			// leave
