@@ -69,6 +69,34 @@ message_parsed_t * decode(char * msg){
 }
 
 /*
+ * Concatène deux strings
+ */
+void stringcats(char **str, const char *str2) {
+    char *tmp = NULL;
+
+    // Reset *str
+    if ( *str != NULL && str2 == NULL ) {
+        free(*str);
+        *str = NULL;
+        return;
+    }
+
+    // Initial copy
+    if (*str == NULL) {
+        *str = calloc( strlen(str2)+1, sizeof(char) );
+        memcpy( *str, str2, strlen(str2) );
+    }
+    else { // Append
+        tmp = calloc( strlen(*str)+1, sizeof(char) );
+        memcpy( tmp, *str, strlen(*str) );
+        *str = calloc( strlen(*str)+strlen(str2)+1, sizeof(char) );
+        memcpy( *str, tmp, strlen(tmp) );
+        memcpy( *str + strlen(*str), str2, strlen(str2) );
+        free(tmp);
+    }
+}
+
+/*
 * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
 */
 char* generateMulticast(char* msg){

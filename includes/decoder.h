@@ -42,6 +42,18 @@ typedef struct {
 message_parsed_t * decode(char* msg);
 
 /*
+ * Concatène deux strings
+ * example :
+	 int main(int argc, char **argv) {
+	 	char * str = "hello";
+	 	cats(&str, "tutu");
+	 	printf("%s\n", str);
+	 	return 0;
+	 }
+ */
+void stringcats(char **str, const char *str2);
+
+/*
  * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
  */
 char* generateMulticast(char* msg);
