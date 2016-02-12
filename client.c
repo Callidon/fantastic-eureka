@@ -27,11 +27,11 @@ void stop() {
 
 // Fonction de saisie de texte pour un message
 void text_input(char * message) {
-	fgets(message, sizeof(message), stdin);
-	// suppresion d'un éventuel retour chariot
+	fgets(message, sizeof(message) * MAX_BUFFER_SIZE, stdin);
+	// remplacement du retour chariot par un terminateur
 	char *p = strchr(message, '\n');
     if(p) {
-		*p = 0;
+		*p = '\0';
 	}
 }
 
