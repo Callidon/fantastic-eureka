@@ -29,34 +29,23 @@ void * server_handler(void * client_datas) {
 					write(datas->array_client->clients[i]->socket, buffer, strlen(buffer));
 				}
 				break;
-			// login
-			case 1 :
-				// TODO à supprimer
-				printf("DEBUG login - message lu : %s \n", buffer);
-				client_ind = array_client_setName(datas->array_client, datas->socket, message->username);
-				// multicast d'un message pour annoncer la connexion du client
-				response = generateMulticast(strcat(message->username, " has join the channel"));
-				for(i = 0; i < datas->array_client->count; i++) {
-					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response));
-					}
-				}
-				break;
 			// leave
 			case 2 :
 				// TODO à supprimer
 				printf("DEBUG leave - message lu : %s \n", buffer);
 				array_client_delete(datas->array_client, datas->socket);
 				close(datas->socket);
-				free(datas);
 
 				// multicast d'un message pour annoncer le départ du client
-				response = generateMulticast(strcat(message->username, " has leave the channel"));
+				response = generateMulticast("user has leave the channel");
 				for(i = 0; i < datas->array_client->count; i++) {
 					if(datas->array_client->clients[i]->socket != datas->socket) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response));
 					}
 				}
+				free(response);
+				free(datas);
+				exit(1);
 				break;
 			// message
 			case 3 :
@@ -69,6 +58,7 @@ void * server_handler(void * client_datas) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response));
 					}
 				}
+				free(response);
 				break;
 			//  message privé
 			case 4 :
@@ -77,7 +67,7 @@ void * server_handler(void * client_datas) {
 				// recherche du destinataire via son username
 				client_t * destinataire;
 				for(i = 0; i < datas->array_client->count; i++) {
-					if(strcmp(datas->array_client->clients[i]->username, message->username)) {
+					if(strcmp(datas->array_client->clients[i]->username, message->destinataire)) {
 						destinataire = datas->array_client->clients[i];
 						break;
 					}
@@ -85,10 +75,10 @@ void * server_handler(void * client_datas) {
 				// envoi du message au destinataire
 				response = generateWhisp(message->username, message->destinataire, message->text);
 				write(destinataire->socket, response, strlen(response));
+				free(response);
 				break;
 		}
 		// nettoyage des variables
-		free(response);
 		message_parsed_free(message);
 	}
 }

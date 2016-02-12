@@ -8,16 +8,17 @@ message_parsed_t * decode(char * msg){
 	char * s1;
 	char * s2;
 	char * s3;
-	msg = strtok(msg,";");
+	char * token;
+	token = strtok(msg,";");
+
 	message_parsed_t *msg_prd = malloc(sizeof(message_parsed_t));
 
-	switch(*msg){
+	switch(atoi(token)){
 
 		case 0 :
 		msg_prd->code = 0;
-		msg = strtok(NULL,";");
-		printf("strtok : %s", msg);
-		msg_prd->text = strdup(msg);
+		token = strtok(NULL,";");
+		msg_prd->text = strdup(token);
 		msg_prd->username = NULL;
 		msg_prd->password = NULL;
 		msg_prd->destinataire = NULL;
@@ -25,42 +26,42 @@ message_parsed_t * decode(char * msg){
 
 		case 1 :
 		msg_prd->code = 1;
-		msg = strtok(NULL,";");
+		token = strtok(NULL,";");
 		msg_prd->text = NULL;
-		msg_prd->username = strdup(msg);
-		msg = strtok(NULL,";");
-		msg_prd->password = strdup(msg);
+		msg_prd->username = strdup(token);
+		token = strtok(NULL,";");
+		msg_prd->password = strdup(token);
 		msg_prd->destinataire = NULL;
 		break;
 
 		case 2 :
 		msg_prd->code = 2;
-		msg = strtok(NULL,";");
+		token = strtok(NULL,";");
 		msg_prd->text = NULL;
-		msg_prd->username = strdup(msg);
+		msg_prd->username = strdup(token);
 		msg_prd->password = NULL;
 		msg_prd->destinataire = NULL;
 		break;
 
 		case 3 :
 		msg_prd->code = 3;
-		msg = strtok(NULL,";");
-		msg_prd->text = strdup(msg);
-		msg = strtok(NULL,";");
-		msg_prd->username = strdup(msg);
+		token = strtok(NULL,";");
+		msg_prd->text = strdup(token);
+		token = strtok(NULL,";");
+		msg_prd->username = strdup(token);
 		msg_prd->password = NULL;
 		msg_prd->destinataire = NULL;
 		break;
 
 		case 4 :
 		msg_prd->code = 4;
-		msg = strtok(NULL,";");
-		msg_prd->text = strdup(msg);
-		msg = strtok(NULL,";");
-		msg_prd->username = strdup(msg);
+		token = strtok(NULL,";");
+		msg_prd->text = strdup(token);
+		token = strtok(NULL,";");
+		msg_prd->username = strdup(token);
 		msg_prd->password = NULL;
-		msg = strtok(NULL,";");
-		msg_prd->destinataire = strdup(msg);
+		token = strtok(NULL,";");
+		msg_prd->destinataire = strdup(token);
 		break;
 	}
 
@@ -71,7 +72,7 @@ message_parsed_t * decode(char * msg){
 * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
 */
 char* generateMulticast(char* msg){
-	char* res = malloc(strlen(msg)+2);
+	char* res = malloc(strlen(msg) + 2);
 	strcpy(res, "0;");
 	strcat(res, msg);
 	return res;
@@ -102,8 +103,8 @@ char* generateLeave(char* username){
 /*
 * Methode qui renvoie un message pour tout les autres clients sous forme de chaine a partir des parametres remplis par le client
 */
-char* generateMsg(char* username ,char* msg){
-	char* res = malloc(strlen(username)+3+strlen(msg));
+char* generateMsg(char* username , char* msg){
+	char* res = malloc(strlen(username) + 3 + strlen(msg));
 	strcpy(res, "3;");
 	strcat(res, username);
 	strcat(res, ";");

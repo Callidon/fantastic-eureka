@@ -98,8 +98,8 @@ int main(int argc, char **argv) {
 
     /* lecture de la reponse en provenance du serveur */
     while((longueur = read(socket_descriptor, buffer, sizeof(buffer))) > 0) {
-	printf("reponse du serveur : \n");
-	write(1,buffer,longueur);
+		printf("reponse du serveur : \n");
+		printf("%s\n", buffer);
     }
 
     printf("\nfin de la reception.\n");
