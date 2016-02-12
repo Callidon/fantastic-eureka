@@ -16,7 +16,7 @@ message_parsed_t * decode(char * msg){
 	switch(atoi(token)){
 
 		case 0 :
-		msg_prd->code = 0;
+		msg_prd->code = Multicast;
 		token = strtok(NULL,";");
 		msg_prd->text = strdup(token);
 		msg_prd->username = NULL;
@@ -25,7 +25,7 @@ message_parsed_t * decode(char * msg){
 		break;
 
 		case 1 :
-		msg_prd->code = 1;
+		msg_prd->code = Login;
 		token = strtok(NULL,";");
 		msg_prd->text = NULL;
 		msg_prd->username = strdup(token);
@@ -35,7 +35,7 @@ message_parsed_t * decode(char * msg){
 		break;
 
 		case 2 :
-		msg_prd->code = 2;
+		msg_prd->code = Leave;
 		token = strtok(NULL,";");
 		msg_prd->text = NULL;
 		msg_prd->username = strdup(token);
@@ -44,7 +44,7 @@ message_parsed_t * decode(char * msg){
 		break;
 
 		case 3 :
-		msg_prd->code = 3;
+		msg_prd->code = Say;
 		token = strtok(NULL,";");
 		msg_prd->text = strdup(token);
 		token = strtok(NULL,";");
@@ -54,7 +54,7 @@ message_parsed_t * decode(char * msg){
 		break;
 
 		case 4 :
-		msg_prd->code = 4;
+		msg_prd->code = Whisper;
 		token = strtok(NULL,";");
 		msg_prd->text = strdup(token);
 		token = strtok(NULL,";");

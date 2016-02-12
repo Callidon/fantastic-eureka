@@ -27,9 +27,18 @@ Exemple de message : 1;Pierre;123456  3;Thomas;Bonjour
 #ifndef DECODER_H
 #define DECODER_H
 
+// Enum représentant le type d'un message 
+typedef enum {
+	Multicast,
+	Login,
+	Leave,
+	Say,
+	Whisper
+} MSGType;
+
 // Structure représentant un message une fois parsé
 typedef struct {
-	int code;
+	MSGType code;
 	char *text;
 	char *username;
 	char *password;

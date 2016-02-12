@@ -21,7 +21,7 @@ void * server_handler(void * client_datas) {
 
 		switch(message->code) {
 			// multicast
-			case 0 :
+			case Multicast :
 				// TODO à supprimer
 				printf("DEBUG multicast - message lu : %s \n", buffer);
 				// on transmet le message à chaque client
@@ -30,7 +30,7 @@ void * server_handler(void * client_datas) {
 				}
 				break;
 			// leave
-			case 2 :
+			case Leave :
 				// TODO à supprimer
 				printf("DEBUG leave - message lu : %s \n", buffer);
 				array_client_delete(datas->array_client, datas->socket);
@@ -48,7 +48,7 @@ void * server_handler(void * client_datas) {
 				exit(1);
 				break;
 			// message
-			case 3 :
+			case Say :
 				// TODO à supprimer
 				printf("DEBUG message - message lu : %s \n", buffer);
 				// transmission du message aux autres clients
@@ -61,7 +61,7 @@ void * server_handler(void * client_datas) {
 				free(response);
 				break;
 			//  message privé
-			case 4 :
+			case Whisper :
 				// TODO à supprimer
 				printf("DEBUG mp - message lu : %s \n", buffer);
 				// recherche du destinataire via son username
