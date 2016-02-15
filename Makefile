@@ -8,4 +8,4 @@ client:
 server: $(SOURCES:.c=.o)
 
 clean:
-	rm server client src/*.o
+	-rm server client src/*.o

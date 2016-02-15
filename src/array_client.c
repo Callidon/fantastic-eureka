@@ -4,6 +4,7 @@
  */
 void array_client_init(array_client_t * array_client, size_t size) {
 	array_client->clients = malloc(sizeof(array_client_t) * size);
+	memset(array_client->clients, 0, size);
 	pthread_mutex_init(&array_client->lock, NULL);
 	array_client->size = size;
 	array_client->count = 0;
