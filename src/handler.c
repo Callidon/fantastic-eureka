@@ -9,6 +9,8 @@ void * server_handler(void * client_datas) {
 		longueur,
 		client_ind;
 
+	memset(buffer, 0, MAX_BUFFER_SIZE);
+	memset(response, 0, MAX_BUFFER_SIZE);
 	for(;;) {
 		// lecture du message
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
@@ -21,14 +23,15 @@ void * server_handler(void * client_datas) {
 
 		switch(message->code) {
 			// multicast
-			case Multicast :
+			case Multicast : {
 				// on transmet le message à chaque client
 				for(i = 0; i < datas->array_client->count; i++) {
 					write(datas->array_client->clients[i]->socket, message->text, sizeof(message->text));
 				}
+			}
 				break;
 			// leave
-			case Leave :
+			case Leave : {
 				array_client_delete(datas->array_client, datas->socket);
 				close(datas->socket);
 
@@ -41,19 +44,22 @@ void * server_handler(void * client_datas) {
 				}
 				free(datas);
 				exit(1);
+			}
 				break;
 			// message
-			case Say :
+			case Say : {
 				// transmission du message aux autres clients
 				generateMsg(response, message->username, message->text);
 				for(i = 0; i < datas->array_client->count; i++) {
-					if(datas->array_client->clients[i]->socket != datas->socket) {
+					/*if(datas->array_client->clients[i]->socket != datas->socket) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response));
-					}
+					}*/
+					write(datas->array_client->clients[i]->socket, response, strlen(response));
 				}
+			}
 				break;
 			//  message privé
-			case Whisper :
+			case Whisper : {
 				// recherche du destinataire via son username
 				client_t * destinataire;
 				for(i = 0; i < datas->array_client->count; i++) {
@@ -65,6 +71,7 @@ void * server_handler(void * client_datas) {
 				// envoi du message au destinataire
 				generateWhisp(response, message->username, message->destinataire, message->text);
 				write(destinataire->socket, response, strlen(response));
+			}
 				break;
 		}
 		// nettoyage des variables

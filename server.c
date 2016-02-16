@@ -45,6 +45,9 @@ main(int argc, char **argv) {
 	char login_msg[MAX_BUFFER_SIZE];
 	char multicast_msg[MAX_BUFFER_SIZE];
 
+	memset(login_msg, 0, MAX_BUFFER_SIZE);
+	memset(multicast_msg, 0, MAX_BUFFER_SIZE);
+
 	// bind du CTRl+C pour arrêter proprement le serveur
 	signal(SIGINT, stop);
 
