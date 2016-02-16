@@ -44,11 +44,11 @@ message_parsed_t * decode(char * msg){
 		break;
 
 		case 3 :
-		msg_prd->code = Say;
-		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
+		msg_prd->code = Say;	
 		token = strtok(NULL,";");
 		msg_prd->username = strdup(token);
+		token = strtok(NULL,";");
+		msg_prd->text = strdup(token);
 		msg_prd->password = NULL;
 		msg_prd->destinataire = NULL;
 		break;
@@ -56,12 +56,12 @@ message_parsed_t * decode(char * msg){
 		case 4 :
 		msg_prd->code = Whisper;
 		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
-		token = strtok(NULL,";");
 		msg_prd->username = strdup(token);
 		msg_prd->password = NULL;
 		token = strtok(NULL,";");
 		msg_prd->destinataire = strdup(token);
+		token = strtok(NULL,";");
+		msg_prd->text = strdup(token);
 		break;
 	}
 
@@ -137,7 +137,7 @@ void generateMsg(char* resp,char* username , char* msg){
 * Methode qui renvoie un message privé pour un autre client sous forme de chaine a partir des parametres remplis par le client
 */
 void generateWhisp(char* resp,char* username, char* destinataire, char* msg){
-	memcpy(resp,"3;",2);
+	memcpy(resp,"4;",2);
 	memcpy(resp+2, username, strlen(username));
 	memcpy(resp+2 + strlen(username), ";", 1);
 	memcpy(resp+2 + strlen(username) + 1,destinataire,strlen(destinataire) + 1);
