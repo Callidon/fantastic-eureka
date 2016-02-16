@@ -33,7 +33,8 @@ void error_stop() {
 /*------------------------------------------------------*/
 main(int argc, char **argv) {
 
-    int socket_descriptor, 		/* descripteur de socket */
+    int ind,
+		socket_descriptor, 		/* descripteur de socket */
 		nouv_socket_descriptor, 	/* [nouveau] descripteur de socket */
 		longueur_adresse_courante; 	/* longueur d'adresse courante d'un client */
     sockaddr_in adresse_locale, 		/* structure d'adresse locale*/
@@ -41,6 +42,8 @@ main(int argc, char **argv) {
     hostent* ptr_hote; 			/* les infos recuperees sur la machine hote */
     servent* ptr_service; 			/* les infos recuperees sur le service de la machine */
     char machine[MAX_BUFFER_SIZE+1]; 	/* nom de la machine locale */
+	char login_msg[MAX_BUFFER_SIZE];
+	char multicast_msg[MAX_BUFFER_SIZE];
 
 	// bind du CTRl+C pour arrêter proprement le serveur
 	signal(SIGINT, stop);
@@ -111,18 +114,15 @@ main(int argc, char **argv) {
 		}
 
 		// on signale au client qu'il est connecté
-		char * login_msg = generateLogin("user", "password");
+		generateLogin(login_msg, "user", "password");
 		write(nouv_socket_descriptor, login_msg, strlen(login_msg));
 
 		// multicast aux autres users pour leur signaler l'arrivée du nouvel user
-		int i;
-		char * multicast_msg = generateMulticast("user has join the channel");
-		for(i = 0; i < array_client->count; i++) {
-			if(array_client->clients[i]->socket != datas->socket) {
-				write(array_client->clients[i]->socket, multicast_msg, strlen(multicast_msg));
+		generateMulticast(multicast_msg, "user has join the channel");
+		for(ind = 0; ind < array_client->count; ind++) {
+			if(array_client->clients[ind]->socket != datas->socket) {
+				write(array_client->clients[ind]->socket, multicast_msg, strlen(multicast_msg));
 			}
 		}
-		free(multicast_msg);
     }
-
 }
