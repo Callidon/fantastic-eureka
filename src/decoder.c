@@ -99,60 +99,51 @@ void stringcats(char **str, const char *str2) {
 /*
 * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
 */
-char* generateMulticast(char* msg){
-	char* res = malloc(strlen(msg) + 2);
-	strcpy(res, "0;");
-	strcat(res, msg);
-	return res;
+void generateMulticast(char* resp, char* msg){
+	memcpy(resp,"0;",2);
+  memcpy(resp+2,msg,strlen(msg)+1);
 }
 
 /*
 * Methode qui renvoie un message de login sous forme de chaine a partir des parametres remplis par le client
 */
-char* generateLogin(char* username, char* password){
-	char* res = malloc(strlen(username)+3+strlen(password));
-	strcpy(res, "1;");
-	strcat(res, username);
-	strcat(res, ";");
-	strcat(res, password);
-	return res;
+void generateLogin(char* resp,char* username, char* password){
+	memcpy(resp,"1;",2);
+	memcpy(resp+2,username,strlen(username));
+	memcpy(resp+2+strlen(username),";",1);
+	memcpy(resp+2+strlen(username)+1,password,strlen(password)+1);
 }
 
 /*
 * Methode qui renvoie un message de deconnexionsous forme de chaine a partir des parametres remplis par le client
 */
-char* generateLeave(char* username){
-	char* res = malloc(strlen(username)+2);
-	strcpy(res, "2;");
-	strcat(res, username);
-	return res;
+void generateLeave(char* resp,char* username){
+	memcpy(resp,"2;",2);
+	memcpy(resp+2,username,strlen(username)+1);
 }
 
 /*
 * Methode qui renvoie un message pour tout les autres clients sous forme de chaine a partir des parametres remplis par le client
 */
-char* generateMsg(char* username , char* msg){
-	char* res = malloc(strlen(username) + 3 + strlen(msg));
-	strcpy(res, "3;");
-	strcat(res, username);
-	strcat(res, ";");
-	strcat(res, msg);
-	return res;
+void generateMsg(char* resp,char* username , char* msg){
+	memcpy(resp,"3;",2);
+	memcpy(resp+2,username,strlen(username));
+	memcpy(resp+2+strlen(username),";",1);
+	memcpy(resp+2+strlen(username)+1,msg,strlen(msg)+1);
 }
 
 
 /*
 * Methode qui renvoie un message privé pour un autre client sous forme de chaine a partir des parametres remplis par le client
 */
-char* generateWhisp(char* username, char* destinataire, char* msg){
-	char* res = malloc(strlen(username)+4+strlen(destinataire)+strlen(msg));
-	strcpy(res, "3;");
-	strcat(res, username);
-	strcat(res, ";");
-	strcat(res, destinataire);
-	strcat(res, ";");
-	strcat(res, msg);
-	return res;
+void generateWhisp(char* resp,char* username, char* destinataire, char* msg){
+	memcpy(resp,"3;",2);
+	memcpy(resp+2, username, strlen(username));
+	memcpy(resp+2 + strlen(username), ";", 1);
+	memcpy(resp+2 + strlen(username) + 1,destinataire,strlen(destinataire) + 1);
+	memcpy(resp+2 + strlen(username) + 1 + strlen(destinataire), ";",1);
+	memcpy(resp+2 + strlen(username) + 1 + strlen(destinataire) + 1, msg, strlen(msg) + 1);
+	
 }
 
 /*

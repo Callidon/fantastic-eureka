@@ -66,27 +66,27 @@ void stringcats(char **str, const char *str2);
 /*
  * Methode qui renvoie un message multicast sous forme de chaine a partir des parametres remplis par le client
  */
-char* generateMulticast(char* msg);
+void generateMulticast(char* resp, char* msg);
 
 /*
  * Methode qui renvoie un message de login sous forme de chaine a partir des parametres remplis par le client
  */
-char* generateLogin(char* username, char* password);
+void generateLogin(char* resp,char* username, char* password);
 
 /*
  * Methode qui renvoie un message de deconnexionsous forme de chaine a partir des parametres remplis par le client
  */
-char* generateLeave(char* username);
+void generateLeave(char* resp,char* username);
 
 /*
  * Methode qui renvoie un message pour tout les autres clients sous forme de chaine a partir des parametres remplis par le client
  */
-char* generateMsg(char* username ,char* msg);
+void generateMsg(char* resp,char* username ,char* msg);
 
 /*
  * Methode qui renvoie un message privé pour un autre client sous forme de chaine a partir des parametres remplis par le client
  */
-char* generateWhisp(char* username, char* destinataire, char* msg);
+void generateWhisp(char* resp,char* username, char* destinataire, char* msg);
 
 /*
  * Méthode libérant une structure message_parsed_t
