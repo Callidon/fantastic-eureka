@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "handler.h"
 
+/*
+ * Méthode qui gère la réception et le traitement des messages reçus côté serveur
+ */
 void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
     char buffer[MAX_BUFFER_SIZE];
@@ -9,10 +12,11 @@ void * server_handler(void * client_datas) {
 		longueur,
 		client_ind;
 
-	memset(buffer, 0, MAX_BUFFER_SIZE);
-	memset(response, 0, MAX_BUFFER_SIZE);
 	for(;;) {
-		// lecture du message
+		memset(buffer, 0, MAX_BUFFER_SIZE);
+		memset(response, 0, MAX_BUFFER_SIZE);
+
+		// lecture du message rentrant
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
@@ -51,10 +55,9 @@ void * server_handler(void * client_datas) {
 				// transmission du message aux autres clients
 				generateMsg(response, message->username, message->text);
 				for(i = 0; i < datas->array_client->count; i++) {
-					/*if(datas->array_client->clients[i]->socket != datas->socket) {
+					if(datas->array_client->clients[i]->socket != datas->socket) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response));
-					}*/
-					write(datas->array_client->clients[i]->socket, response, strlen(response));
+					}
 				}
 			}
 				break;
@@ -71,6 +74,57 @@ void * server_handler(void * client_datas) {
 				// envoi du message au destinataire
 				generateWhisp(response, message->username, message->destinataire, message->text);
 				write(destinataire->socket, response, strlen(response));
+			}
+				break;
+		}
+		// nettoyage des variables
+		message_parsed_free(message);
+	}
+}
+
+/*
+ * Méthode qui gère la réception et le traitement des messages reçus côté client
+ */
+void * client_handler(void * render_datas) {
+	render_datas_t * datas = (render_datas_t *) render_datas;
+    char buffer[MAX_BUFFER_SIZE];
+	char response[MAX_BUFFER_SIZE];
+    int i,
+		longueur;
+
+	for(;;) {
+		memset(buffer, 0, MAX_BUFFER_SIZE);
+		memset(response, 0, MAX_BUFFER_SIZE);
+
+		// lecture du message entrant
+	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
+		    return;
+		}
+		printf("message lu : %s \n", buffer);
+
+		// on décode le message
+		message_parsed_t * message = decode(buffer);
+
+		switch(message->code) {
+			// multicast
+			case Multicast : {
+				// on affiche le message
+				printf("multicast\n"); // FIX ME
+			}
+				break;
+			// leave
+			case Leave : {
+				printf("leave\n"); // FIX ME
+			}
+				break;
+			// message
+			case Say : {
+				printf("say\n"); // FIX ME
+			}
+				break;
+			//  message privé
+			case Whisper : {
+				printf("whisper\n"); // FIX ME
 			}
 				break;
 		}

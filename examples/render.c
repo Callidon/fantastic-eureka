@@ -28,9 +28,9 @@ void yolo_version() {
 void * ncurses_render(void * window) {
 	int i;
 	for(i = 1; i < 30; i++) {
-		mvwprintw(window, i, 1, "Choupette");
+		wprintw(window, "Choupette %d\n", i);
 		wrefresh(window);
-		sleep(5);
+		sleep(1);
 	}
 }
 
@@ -45,9 +45,11 @@ void ncurses_version() {
 
 	box(up, ACS_VLINE, ACS_HLINE);
 	box(down, ACS_VLINE, ACS_HLINE);
+	scrollok(up, TRUE);
 
 	//mvwprintw(up, 1, 1, "Fentre du haut");
 	pthread_create(&thread, NULL, ncurses_render, (void *) up);
+
 	mvwprintw(down, 1, 1, "Fenêtre du bas");
 
 	//wrefresh(up);
@@ -63,6 +65,6 @@ void ncurses_version() {
 // main
 int main(void) {
 	//yolo_version();
-	//ncurses_version();
+	ncurses_version();
 	return 0;
 }
