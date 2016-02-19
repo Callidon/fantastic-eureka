@@ -1,7 +1,7 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include <ncruses.h>
+#include <ncurses.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <pthread.h>

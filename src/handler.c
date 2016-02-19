@@ -47,7 +47,7 @@ void * server_handler(void * client_datas) {
 					}
 				}
 				free(datas);
-				exit(1);
+				// TODO exit
 			}
 				break;
 			// message
@@ -109,7 +109,7 @@ void * client_handler(void * render_datas) {
 			// multicast
 			case Multicast : {
 				// on affiche le message
-				printf("multicast\n"); // FIX ME
+				wprintw(datas->window, "coucou");
 			}
 				break;
 			// leave

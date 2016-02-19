@@ -10,19 +10,28 @@ client <adresse-serveur> <message-a-transmettre>
 #include <string.h>
 #include <signal.h>
 #include "config.h"
+#include "handler.h"
 
 typedef struct sockaddr 	sockaddr;
 typedef struct sockaddr_in 	sockaddr_in;
 typedef struct hostent 		hostent;
 typedef struct servent 		servent;
 
+WINDOW * wchat, * winput; /* Fenêtres d'affichage */
+pthread_t thread_handler; /* Thread du handler côté client */
 int socket_descriptor; /* descripteur de socket */
+render_datas_t * render_datas; /* données à passer au thread de rendu */
 
 // Fonction d'arrêt du client
 void stop() {
-	printf("\nfin de la reception.\n");
+	// arrêt du thread
+	pthread_exit(&thread_handler);
+	free(render_datas);
+	// fin de la réception
     close(socket_descriptor);
-    printf("connexion avec le serveur fermee, fin du programme.\n");
+	// fin de ncruses
+	// TODO
+	exit(0);
 }
 
 // Fonction de saisie de texte pour un message
@@ -45,6 +54,9 @@ int main(int argc, char **argv) {
 	char message[MAX_BUFFER_SIZE];	/* message envoyé */
     char *	prog; 			/* nom du programme */
     char *	host; 			/* nom de la machine distante */
+
+	memset(buffer, 0, MAX_BUFFER_SIZE);
+	memset(message, 0, MAX_BUFFER_SIZE);
 
     if (argc != 2) {
 		perror("usage : client <adresse-serveur>");
@@ -84,17 +96,39 @@ int main(int argc, char **argv) {
 		exit(1);
     }
 
+	// passage en mode ncurses
+	initscr();
+	wchat = subwin(stdscr, LINES/2, COLS, 0, 0);
+	winput = subwin(stdscr, LINES/2, COLS, LINES/2, 0);
+
+	box(wchat, ACS_VLINE, ACS_HLINE);
+	box(winput, ACS_VLINE, ACS_HLINE);
+	scrollok(wchat, TRUE);
+
+	// stockage des données et lancement du thread pour le rendu du chat
+	render_datas = malloc(sizeof(render_datas_t));
+	render_datas->window = wchat;
+	render_datas->socket = socket_descriptor;
+	pthread_create(&thread_handler, NULL, client_handler, (void *) render_datas);
+
+	// init de la fenête d'input TODO
+	mvwprintw(winput, 1, 1, "Message : ");
+	wrefresh(winput);
+
+	text_input(message);
+	printf("%s", message);
+	endwin();
+	delwin(wchat);
+	delwin(winput);
 
     /* lecture des messages en provenance du serveur */
-    while((longueur = read(socket_descriptor, buffer, sizeof(buffer))) > 0) {
+    /*while((longueur = read(socket_descriptor, buffer, sizeof(buffer))) > 0) {
 		printf("message reçu du serveur : %s\n", buffer);
 		printf("Saisissez votre message :\n");
 		text_input(message);
-		/* envoi du message vers le serveur */
 		if ((write(socket_descriptor, message, strlen(message))) < 0) {
 			perror("erreur : impossible d'ecrire le message destine au serveur.");
 			exit(1);
 		}
-    }
-	exit(0);
+    }*/
 }
