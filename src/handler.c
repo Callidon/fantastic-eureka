@@ -20,7 +20,8 @@ void * server_handler(void * client_datas) {
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
-		printf("message lu : %s \n", buffer);
+		// TODO à supprimer
+		printf("DEBUG - message lu : %s \n", buffer);
 
 		// on décode le message
 		message_parsed_t * message = decode(buffer);
@@ -47,7 +48,7 @@ void * server_handler(void * client_datas) {
 					}
 				}
 				free(datas);
-				// TODO exit
+				pthread_exit(0);
 			}
 				break;
 			// message
@@ -100,7 +101,8 @@ void * client_handler(void * render_datas) {
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
-		printf("message lu : %s \n", buffer);
+		// TODO à supprimer
+		wprintw(datas->window, "DEBUG - message lu : %s \n", buffer);
 
 		// on décode le message
 		message_parsed_t * message = decode(buffer);
@@ -109,25 +111,27 @@ void * client_handler(void * render_datas) {
 			// multicast
 			case Multicast : {
 				// on affiche le message
-				wprintw(datas->window, "coucou");
+				wprintw(datas->window, "multicast");
 			}
 				break;
 			// leave
 			case Leave : {
-				printf("leave\n"); // FIX ME
+				wprintw(datas->window, "leave"); // FIX ME
 			}
 				break;
 			// message
 			case Say : {
-				printf("say\n"); // FIX ME
+				wprintw(datas->window, "say"); // FIX ME
 			}
 				break;
 			//  message privé
 			case Whisper : {
-				printf("whisper\n"); // FIX ME
+				wprintw(datas->window, "whisper"); // FIX ME
 			}
 				break;
 		}
+		// refresh de la fenêtre
+		wrefresh(datas->window);
 		// nettoyage des variables
 		message_parsed_free(message);
 	}

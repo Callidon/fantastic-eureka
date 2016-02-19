@@ -17,15 +17,13 @@ typedef struct sockaddr_in 	sockaddr_in;
 typedef struct hostent 		hostent;
 typedef struct servent 		servent;
 
-WINDOW * wchat, * winput; /* Fenêtres d'affichage */
 pthread_t thread_handler; /* Thread du handler côté client */
 int socket_descriptor; /* descripteur de socket */
 render_datas_t * render_datas; /* données à passer au thread de rendu */
 
 // Fonction d'arrêt du client
 void stop() {
-	// arrêt du thread
-	pthread_exit(&thread_handler);
+	pthread_cancel(thread_handler);
 	free(render_datas);
 	// fin de la réception
     close(socket_descriptor);
@@ -54,6 +52,7 @@ int main(int argc, char **argv) {
 	char message[MAX_BUFFER_SIZE];	/* message envoyé */
     char *	prog; 			/* nom du programme */
     char *	host; 			/* nom de la machine distante */
+	WINDOW * wchat, * winput; /* Fenêtres d'affichage */
 
 	memset(buffer, 0, MAX_BUFFER_SIZE);
 	memset(message, 0, MAX_BUFFER_SIZE);
@@ -98,6 +97,7 @@ int main(int argc, char **argv) {
 
 	// passage en mode ncurses
 	initscr();
+	noecho();
 	wchat = subwin(stdscr, LINES/2, COLS, 0, 0);
 	winput = subwin(stdscr, LINES/2, COLS, LINES/2, 0);
 
@@ -105,18 +105,26 @@ int main(int argc, char **argv) {
 	box(winput, ACS_VLINE, ACS_HLINE);
 	scrollok(wchat, TRUE);
 
+	// init de la fenête d'input TODO
+	mvwprintw(winput, 1, 1, "Message : ");
+	wrefresh(wchat);
+	wrefresh(winput);
+
 	// stockage des données et lancement du thread pour le rendu du chat
 	render_datas = malloc(sizeof(render_datas_t));
 	render_datas->window = wchat;
 	render_datas->socket = socket_descriptor;
-	pthread_create(&thread_handler, NULL, client_handler, (void *) render_datas);
+	if(pthread_create(&thread_handler, NULL, client_handler, (void *) render_datas) < 0) {
+		perror("erreur : impossible de créer un nouveau thread");
+		exit(1);
+	}
 
-	// init de la fenête d'input TODO
-	mvwprintw(winput, 1, 1, "Message : ");
-	wrefresh(winput);
-
-	text_input(message);
-	printf("%s", message);
+	wgetstr(winput, message);
+	wprintw(wchat, "message tapé : %s\n", message);
+	wrefresh(wchat);
+	sleep(3);
+	generateLeave(message, "Toto");
+	write(socket_descriptor, message, strlen(message));
 	endwin();
 	delwin(wchat);
 	delwin(winput);
