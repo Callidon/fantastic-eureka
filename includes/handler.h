@@ -1,3 +1,7 @@
+/*
+ * Structures et fonctions relatives à la réception et au traitement des messages réseaux 
+ * Auteurs : Pierre Gaultier & Thomas Minier
+ */
 #ifndef HANDLER_H
 #define HANDLER_H
 

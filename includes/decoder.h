@@ -81,6 +81,4 @@ void generateWhisp(char* resp,char* username, char* destinataire, char* msg);
  */
 void message_parsed_free(message_parsed_t * message);
 
-// TODO réparer le parseur
-
 #endif

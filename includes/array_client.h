@@ -6,7 +6,7 @@
  #include <pthread.h>
  #include <string.h>
  #include "config.h"
- 
+
 #ifndef ARRAY_CLIENT_H
 #define ARRAY_CLIENT_H
 
@@ -14,7 +14,7 @@
 // Structure représentant un client
 typedef struct {
 	int socket;
-	char * username;
+	char username [MAX_USERNAME_SIZE];
 	pthread_t client_thread;
 	pthread_mutex_t lock;
 } client_t;
@@ -38,7 +38,7 @@ void array_client_init(array_client_t * array_client, size_t size);
 void array_client_free(array_client_t * array_client);
 
 /*
- * Ajoute un client à une collection
+ * Ajoute un client à une collection de clients
  */
 int array_client_add(array_client_t * array_client, int client_socket);
 
@@ -50,7 +50,6 @@ int array_client_setName(array_client_t * array_client, int client_socket, char 
 /*
  * Supprime un client d'une collection
  */
- // TODO trouver pourquoi ça foire quand il y a deux clients en même temps ... wesh
 int array_client_delete(array_client_t * array_client, int client_socket);
 
 /*

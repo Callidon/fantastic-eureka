@@ -33,8 +33,8 @@ void stop() {
 }
 
 // Fonction de saisie de texte pour un message
-void text_input(char * message) {
-	fgets(message, MAX_BUFFER_SIZE, stdin);
+void text_input(WINDOW *win, char * message, size_t max_char) {
+	wgetnstr(win, message, max_char);
 	// remplacement du retour chariot par un terminateur
 	char *p = strchr(message, '\n');
     if(p) {
@@ -97,13 +97,11 @@ int main(int argc, char **argv) {
 
 	// passage en mode ncurses
 	initscr();
-	noecho();
+
 	wchat = subwin(stdscr, LINES/2, COLS, 0, 0);
 	winput = subwin(stdscr, LINES/2, COLS, LINES/2, 0);
-
-	box(wchat, ACS_VLINE, ACS_HLINE);
-	box(winput, ACS_VLINE, ACS_HLINE);
 	scrollok(wchat, TRUE);
+	scrollok(winput, TRUE);
 
 	// init de la fenête d'input TODO
 	mvwprintw(winput, 1, 1, "Message : ");
@@ -119,24 +117,25 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	wgetstr(winput, message);
+	// input
+	text_input(winput, message, MAX_BUFFER_SIZE);
+	// affichag de l'input
 	wprintw(wchat, "message tapé : %s\n", message);
 	wrefresh(wchat);
-	sleep(3);
-	generateLeave(message, "Toto");
+	// resresh de la fenêtre d'input
+	wclear(winput);
+	mvwprintw(winput, 1, 1, "Message : ");
+	wrefresh(winput);
+	// délai pour visualiser les changements
+	sleep(5);
+
+	// création du message de départ du chat
+	generateLeave(message, "User has leave the channel");
 	write(socket_descriptor, message, strlen(message));
+
+	// fin du programme
 	endwin();
 	delwin(wchat);
 	delwin(winput);
-
-    /* lecture des messages en provenance du serveur */
-    /*while((longueur = read(socket_descriptor, buffer, sizeof(buffer))) > 0) {
-		printf("message reçu du serveur : %s\n", buffer);
-		printf("Saisissez votre message :\n");
-		text_input(message);
-		if ((write(socket_descriptor, message, strlen(message))) < 0) {
-			perror("erreur : impossible d'ecrire le message destine au serveur.");
-			exit(1);
-		}
-    }*/
+	stop();
 }

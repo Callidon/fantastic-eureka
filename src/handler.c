@@ -20,6 +20,7 @@ void * server_handler(void * client_datas) {
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
+
 		// TODO à supprimer
 		printf("DEBUG - message lu : %s \n", buffer);
 
@@ -27,7 +28,7 @@ void * server_handler(void * client_datas) {
 		message_parsed_t * message = decode(buffer);
 
 		switch(message->code) {
-			// multicast
+			// cas d'un message de multicast
 			case Multicast : {
 				// on transmet le message à chaque client
 				for(i = 0; i < datas->array_client->count; i++) {
@@ -35,7 +36,20 @@ void * server_handler(void * client_datas) {
 				}
 			}
 				break;
-			// leave
+			// cas d'un message de connexion
+			case Login: {
+				// set de l'username du client
+				array_client_setName(datas->array_client, datas->socket, message->username);
+
+				// envoi d'un message de type 1 au client pour valider l'échange
+				// TODO à améliorer (nouveau type de message ?)
+				generateLogin(response, message->username, message->password);
+				write(datas->socket, response, strlen(response));
+
+				// TODO signaler aux autres clients la connexion ?
+			}
+				break;
+			// cas d'un message de déconnexion
 			case Leave : {
 				array_client_delete(datas->array_client, datas->socket);
 				close(datas->socket);
@@ -51,7 +65,7 @@ void * server_handler(void * client_datas) {
 				pthread_exit(0);
 			}
 				break;
-			// message
+			// cas d'un message classique
 			case Say : {
 				// transmission du message aux autres clients
 				generateMsg(response, message->username, message->text);
@@ -62,7 +76,7 @@ void * server_handler(void * client_datas) {
 				}
 			}
 				break;
-			//  message privé
+			//  cas d'un message de privé
 			case Whisper : {
 				// recherche du destinataire via son username
 				client_t * destinataire;
@@ -78,7 +92,6 @@ void * server_handler(void * client_datas) {
 			}
 				break;
 		}
-		// nettoyage des variables
 		message_parsed_free(message);
 	}
 }
@@ -108,31 +121,29 @@ void * client_handler(void * render_datas) {
 		message_parsed_t * message = decode(buffer);
 
 		switch(message->code) {
-			// multicast
+			// cas d'un message de multicast
 			case Multicast : {
 				// on affiche le message
-				wprintw(datas->window, "multicast");
+				wprintw(datas->window, message->text);
 			}
 				break;
-			// leave
+			// cas d'un message de déconnexion
 			case Leave : {
 				wprintw(datas->window, "leave"); // FIX ME
 			}
 				break;
-			// message
+			// cas d'un message classique
 			case Say : {
 				wprintw(datas->window, "say"); // FIX ME
 			}
 				break;
-			//  message privé
+			//  cas d'un message privé
 			case Whisper : {
 				wprintw(datas->window, "whisper"); // FIX ME
 			}
 				break;
 		}
-		// refresh de la fenêtre
 		wrefresh(datas->window);
-		// nettoyage des variables
 		message_parsed_free(message);
 	}
 }

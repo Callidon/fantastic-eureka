@@ -116,6 +116,7 @@ main(int argc, char **argv) {
 			error_stop();
 		}
 
+		// TODO Possiblement à virer
 		// on signale au client qu'il est connecté
 		generateLogin(login_msg, "user", "password");
 		write(nouv_socket_descriptor, login_msg, strlen(login_msg));
@@ -127,5 +128,6 @@ main(int argc, char **argv) {
 				write(array_client->clients[ind]->socket, multicast_msg, strlen(multicast_msg));
 			}
 		}
+		// END TODO
     }
 }

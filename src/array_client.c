@@ -28,12 +28,12 @@ void array_client_free(array_client_t * array_client) {
 }
 
 /*
- * Ajoute un client à une collection
+ * Ajoute un client à une collection de clients
  */
 int array_client_add(array_client_t * array_client, int client_socket) {
 	pthread_mutex_lock(&array_client->lock);
 
-	// if the array is full
+	// Si la tableau est plein, on l'agrandit
 	if(array_client->count == array_client->size) {
 		array_client->size *= 2;
 		array_client->clients = realloc(array_client->clients, array_client->size * sizeof(client_t));
@@ -41,9 +41,8 @@ int array_client_add(array_client_t * array_client, int client_socket) {
 
 	client_t * new_client = malloc(sizeof(client_t));
 	new_client->socket = client_socket;
-	new_client->username = "";
+	memset(new_client->username, 0, MAX_USERNAME_SIZE);
 	pthread_mutex_init(&new_client->lock, NULL);
-
 	array_client->clients[array_client->count] = new_client;
 	array_client->count++;
 
@@ -59,11 +58,11 @@ int array_client_setName(array_client_t * array_client, int client_socket, char 
 	int client_ind;
 	pthread_mutex_lock(&array_client->lock);
 
-	// search for the client
+	// recherche du client en question
 	for(i = 0; i < array_client->count; i++) {
 		if(array_client->clients[i]->socket == client_socket) {
 			pthread_mutex_lock(&array_client->clients[i]->lock);
-			array_client->clients[i]->username = strdup(name);
+			memcpy(array_client->clients[i]->username, name, strlen(name) + 1);
 			pthread_mutex_unlock(&array_client->clients[i]->lock);
 			client_ind = i;
 		}
@@ -82,7 +81,7 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 	client_t * client;
 	pthread_mutex_lock(&array_client->lock);
 
-	// search for the client
+	// recherche du client en question
 	for(i = 0; i < array_client->count; i++) {
 		if(array_client->clients[i]->socket == client_socket) {
 			client = array_client->clients[i];
