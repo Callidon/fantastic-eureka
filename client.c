@@ -8,7 +8,6 @@ client <adresse-serveur> <message-a-transmettre>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
-#include <signal.h>
 #include "config.h"
 #include "handler.h"
 
@@ -20,27 +19,6 @@ typedef struct servent 		servent;
 pthread_t thread_handler; /* Thread du handler côté client */
 int socket_descriptor; /* descripteur de socket */
 render_datas_t * render_datas; /* données à passer au thread de rendu */
-
-// Fonction d'arrêt du client
-void stop() {
-	pthread_cancel(thread_handler);
-	free(render_datas);
-	// fin de la réception
-    close(socket_descriptor);
-	// fin de ncruses
-	// TODO
-	exit(0);
-}
-
-// Fonction de saisie de texte pour un message
-void text_input(WINDOW *win, char * message, size_t max_char) {
-	wgetnstr(win, message, max_char);
-	// remplacement du retour chariot par un terminateur
-	char *p = strchr(message, '\n');
-    if(p) {
-		*p = '\0';
-	}
-}
 
 int main(int argc, char **argv) {
 
@@ -64,9 +42,6 @@ int main(int argc, char **argv) {
 
     prog = argv[0];
     host = argv[1];
-
-	// bind du CTRl+C pour arrêter proprement le client
-	signal(SIGINT, stop);
 
     printf("adresse du serveur  : %s \n", host);
 
@@ -103,8 +78,6 @@ int main(int argc, char **argv) {
 	scrollok(wchat, TRUE);
 	scrollok(winput, TRUE);
 
-	// init de la fenête d'input TODO
-	mvwprintw(winput, 1, 1, "Message : ");
 	wrefresh(wchat);
 	wrefresh(winput);
 
@@ -117,6 +90,28 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+	// demande de l'username
+	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
+	// attend la réception de l'accusé
+	// si l'accusé est bon, on passe en écran de sélection d'action
+
+	// sélection d'action :
+	// demande d'input selon un uméro d'un menu
+	// en fonction du numéro
+	// cas message :
+		// affichage du menu pour les messages
+		// envoi du message au serveur
+	// cas whisper :
+		// affichage du menu pour les whispers
+		// envoi du message au serveur
+	// cas de déconnexion :
+		// envoi le message de déconnexion au serveur
+		// nettoie le thread de client_handler
+		// nettoie ncruses
+		// nettoie les allocations
+		// exit(0);
+
+	// TODO : ancien workflow, à virer
 	// input
 	text_input(winput, message, MAX_BUFFER_SIZE);
 	// affichag de l'input
@@ -132,10 +127,15 @@ int main(int argc, char **argv) {
 	// création du message de départ du chat
 	generateLeave(message, "User has leave the channel");
 	write(socket_descriptor, message, strlen(message));
+	// END TODO
 
 	// fin du programme
 	endwin();
 	delwin(wchat);
 	delwin(winput);
-	stop();
+	pthread_cancel(thread_handler);
+	free(render_datas);
+	// fin de la réception
+    close(socket_descriptor);
+	exit(0);
 }

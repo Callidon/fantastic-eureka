@@ -1,11 +1,10 @@
 /*
- * Structures et fonctions relatives à la réception et au traitement des messages réseaux 
+ * Structures et fonctions relatives à la réception et au traitement des messages réseaux
  * Auteurs : Pierre Gaultier & Thomas Minier
  */
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include <ncurses.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -17,6 +16,7 @@
 #include "config.h"
 #include "decoder.h"
 #include "array_client.h"
+#include "menus.h"
 
 typedef struct {
 	int socket;

@@ -46,10 +46,10 @@ void * server_handler(void * client_datas) {
 				write(datas->socket, response, strlen(response));
 				memset(response, 0, MAX_BUFFER_SIZE);
 				// multicast aux autres users pour leur signaler l'arrivée du nouvel user
-				generateMulticast(multicast_msg, "user has join the channel");
-				for(ind = 0; ind < array_client->count; ind++) {
-					if(array_client->clients[ind]->socket != datas->socket) {
-						write(array_client->clients[ind]->socket, multicast_msg, strlen(multicast_msg));
+				generateMulticast(response, "user has join the channel");
+				for(i = 0; i < datas->array_client->count; i++) {
+					if(datas->array_client->clients[i]->socket != datas->socket) {
+						write(datas->array_client->clients[i]->socket, response, strlen(response));
 					}
 				}
 

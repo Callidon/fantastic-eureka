@@ -11,4 +11,7 @@
 // Nombre max de caractères dans un nom d'utilisateur
 #define MAX_USERNAME_SIZE 100
 
+// Nombre max de caractères dans un message
+#define MAX_MESSAGE_SIZE 100
+
 #endif
