@@ -34,7 +34,8 @@ typedef enum {
 	Login,
 	Leave,
 	Say,
-	Whisper
+	Whisper,
+	AckLogin
 } MSGType;
 
 // Structure représentant un message une fois parsé
@@ -75,6 +76,11 @@ void generateMsg(char* resp,char* username ,char* msg);
  * Methode qui renvoie un message privé pour un autre client sous forme de chaine a partir des parametres remplis par le client
  */
 void generateWhisp(char* resp,char* username, char* destinataire, char* msg);
+
+/*
+ * Methode qui renvoie un aquittement quand le client est authorisé a se connecter
+ */
+void generateAckLogin(char* resp);
 
 /*
  * Méthode libérant une structure message_parsed_t

@@ -63,6 +63,14 @@ message_parsed_t * decode(char * msg){
 		token = strtok(NULL,";");
 		msg_prd->text = strdup(token);
 		break;
+
+		case 5 :
+		msg_prd->code = AckLogin;
+		msg_prd->text = strdup(token);
+		msg_prd->username = NULL;
+		msg_prd->password = NULL;
+		msg_prd->destinataire = NULL;
+		break;
 	}
 
 	return  msg_prd;
@@ -117,6 +125,15 @@ void generateWhisp(char* resp,char* username, char* destinataire, char* msg){
 	memcpy(resp + 2 + strlen(username) + 1 + strlen(destinataire) + 1, msg, strlen(msg) + 1);
 
 }
+
+/*
+ * Methode qui renvoie un aquittement quand le client est authorisé a se connecter
+ */
+void generateAckLogin(char* resp){
+	memcpy(resp, "5;", 2);
+	memcpy(resp + 2, "ok", 2);
+}
+
 
 /*
 * Méthode libérant une structure message_parsed_t

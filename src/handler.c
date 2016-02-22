@@ -42,11 +42,17 @@ void * server_handler(void * client_datas) {
 				array_client_setName(datas->array_client, datas->socket, message->username);
 
 				// envoi d'un message de type 1 au client pour valider l'échange
-				// TODO à améliorer (nouveau type de message ?)
-				generateLogin(response, message->username, message->password);
+				generateAckLogin(response);
 				write(datas->socket, response, strlen(response));
+				memset(response, 0, MAX_BUFFER_SIZE);
+				// multicast aux autres users pour leur signaler l'arrivée du nouvel user
+				generateMulticast(multicast_msg, "user has join the channel");
+				for(ind = 0; ind < array_client->count; ind++) {
+					if(array_client->clients[ind]->socket != datas->socket) {
+						write(array_client->clients[ind]->socket, multicast_msg, strlen(multicast_msg));
+					}
+				}
 
-				// TODO signaler aux autres clients la connexion ?
 			}
 				break;
 			// cas d'un message de déconnexion
