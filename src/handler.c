@@ -57,10 +57,16 @@ void * server_handler(void * client_datas) {
 				break;
 			// cas d'un message de déconnexion
 			case Leave : {
+				// on termine la connexion avec le client
 				array_client_delete(datas->array_client, datas->socket);
 				close(datas->socket);
 
+				// on signale au client q'il peut terminer la connexion de son côté
+				generateLeave(response, "user can leave the channel"); // TODO rajouter un message spécial type ack pour ça ?
+				write(datas->socket, response, strlen(response));
+
 				// multicast d'un message pour annoncer le départ du client
+				memset(response, 0, MAX_BUFFER_SIZE);
 				generateMulticast(response, "user has leave the channel");
 				for(i = 0; i < datas->array_client->count; i++) {
 					if(datas->array_client->clients[i]->socket != datas->socket) {
@@ -122,6 +128,7 @@ void * client_handler(void * render_datas) {
 		}
 		// TODO à supprimer
 		wprintw(datas->window, "DEBUG - message lu : %s \n", buffer);
+		wrefresh(datas->window);
 
 		// on décode le message
 		message_parsed_t * message = decode(buffer);
@@ -130,22 +137,24 @@ void * client_handler(void * render_datas) {
 			// cas d'un message de multicast
 			case Multicast : {
 				// on affiche le message
-				wprintw(datas->window, message->text);
+				print_multicast(datas->window, message->text);
 			}
 				break;
 			// cas d'un message de déconnexion
 			case Leave : {
-				wprintw(datas->window, "leave"); // FIX ME
+				print_multicast(datas->window, "Leaving the channel...");
+				close(datas->socket);
+				pthread_exit(0);
 			}
 				break;
 			// cas d'un message classique
 			case Say : {
-				wprintw(datas->window, "say"); // FIX ME
+				print_message(datas->window, message->username, message->text);
 			}
 				break;
 			//  cas d'un message privé
 			case Whisper : {
-				wprintw(datas->window, "whisper"); // FIX ME
+				print_whisper(datas->window, message->username, message->text);
 			}
 				break;
 		}

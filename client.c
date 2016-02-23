@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     servent *	ptr_service; 		/* info sur service */
     char buffer[MAX_BUFFER_SIZE];	/* buffer de réception des messages venant du serveur */
 	char message[MAX_BUFFER_SIZE];	/* message envoyé */
+	char username[MAX_USERNAME_SIZE]; /* nom d'utilisateur */
     char *	prog; 			/* nom du programme */
     char *	host; 			/* nom de la machine distante */
 	WINDOW * wchat, * winput; /* Fenêtres d'affichage */
@@ -85,11 +86,12 @@ int main(int argc, char **argv) {
 	render_datas = malloc(sizeof(render_datas_t));
 	render_datas->window = wchat;
 	render_datas->socket = socket_descriptor;
-	if(pthread_create(&thread_handler, NULL, client_handler, (void *) render_datas) < 0) {
+	if(pthread_create(&thread_handler, NULL, client_handler, render_datas) < 0) {
 		perror("erreur : impossible de créer un nouveau thread");
 		exit(1);
 	}
 
+	menu_ask_username(winput, username);
 	// demande de l'username
 	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
 	// attend la réception de l'accusé
@@ -112,30 +114,32 @@ int main(int argc, char **argv) {
 		// exit(0);
 
 	// TODO : ancien workflow, à virer
-	// input
-	text_input(winput, message, MAX_BUFFER_SIZE);
 	// affichag de l'input
-	wprintw(wchat, "message tapé : %s\n", message);
+	wprintw(wchat, "message tapé : %s\n", username);
 	wrefresh(wchat);
-	// resresh de la fenêtre d'input
-	wclear(winput);
-	mvwprintw(winput, 1, 1, "Message : ");
-	wrefresh(winput);
+	clear_window(wchat);
 	// délai pour visualiser les changements
 	sleep(5);
 
 	// création du message de départ du chat
-	generateLeave(message, "User has leave the channel");
+	generateLeave(message, "User wants to leave the channel");
 	write(socket_descriptor, message, strlen(message));
 	// END TODO
+
+	// on attend la fin du thread du handler avant de fermer le programme
+	wprintw(wchat, "waiting for the thread\n");
+	wrefresh(wchat);
+
+	pthread_join(thread_handler, NULL);
+
+	wprintw(wchat, "thread done\n");
+	wrefresh(wchat);
+	sleep(5);
 
 	// fin du programme
 	endwin();
 	delwin(wchat);
 	delwin(winput);
-	pthread_cancel(thread_handler);
 	free(render_datas);
-	// fin de la réception
-    close(socket_descriptor);
 	exit(0);
 }
