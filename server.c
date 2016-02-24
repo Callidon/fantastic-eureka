@@ -73,6 +73,11 @@ main(int argc, char **argv) {
 		error_stop();
     }
 
+	if (setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0) {
+		perror("setsockopt(SO_REUSEADDR) failed");
+		error_stop();
+	}
+
     /* association du socket socket_descriptor à la structure d'adresse adresse_locale */
     if ((bind(socket_descriptor, (sockaddr*)(&adresse_locale), sizeof(adresse_locale))) < 0) {
 		perror("Erreur : impossible de lier la socket a l'adresse de connexion.");
@@ -110,5 +115,6 @@ main(int argc, char **argv) {
 			perror("Erreur - impossible de créer le thread pour gérer la connexion avec le client");
 			error_stop();
 		}
+		pthread_detach(array_client->clients[client_ind]->client_thread);
     }
 }

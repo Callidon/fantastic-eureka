@@ -57,10 +57,6 @@ void * server_handler(void * client_datas) {
 				break;
 			// cas d'un message de déconnexion
 			case Leave : {
-				// on termine la connexion avec le client
-				array_client_delete(datas->array_client, datas->socket);
-				close(datas->socket);
-
 				// on signale au client q'il peut terminer la connexion de son côté
 				generateLeave(response, "user can leave the channel"); // TODO rajouter un message spécial type ack pour ça ?
 				write(datas->socket, response, strlen(response));
@@ -73,6 +69,11 @@ void * server_handler(void * client_datas) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response));
 					}
 				}
+
+				// on termine la connexion avec le client
+				close(datas->socket);
+				array_client_delete(datas->array_client, datas->socket);
+
 				free(datas);
 				pthread_exit(0);
 			}
@@ -126,6 +127,7 @@ void * client_handler(void * render_datas) {
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
+
 		// TODO à supprimer
 		wprintw(datas->window, "DEBUG - message lu : %s \n", buffer);
 		wrefresh(datas->window);
@@ -144,6 +146,7 @@ void * client_handler(void * render_datas) {
 			case Leave : {
 				print_multicast(datas->window, "Leaving the channel...");
 				close(datas->socket);
+				free(datas);
 				pthread_exit(0);
 			}
 				break;

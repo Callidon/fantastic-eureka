@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
 
 	memset(buffer, 0, MAX_BUFFER_SIZE);
 	memset(message, 0, MAX_BUFFER_SIZE);
+	memset(username, 0, MAX_USERNAME_SIZE);
 
     if (argc != 2) {
 		perror("usage : client <adresse-serveur>");
@@ -91,10 +92,16 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	menu_ask_username(winput, username);
 	// demande de l'username
+	menu_ask_username(winput, username);
+	wprintw(wchat, "username tapé : %s\n", username);
+	wrefresh(wchat);
+
 	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
-	// attend la réception de l'accusé
+	generateLogin(message, username, "password");
+	write(socket_descriptor, message, strlen(message));
+	clear_window(wchat);
+
 	// si l'accusé est bon, on passe en écran de sélection d'action
 
 	// sélection d'action :
@@ -113,33 +120,20 @@ int main(int argc, char **argv) {
 		// nettoie les allocations
 		// exit(0);
 
-	// TODO : ancien workflow, à virer
-	// affichag de l'input
-	wprintw(wchat, "message tapé : %s\n", username);
-	wrefresh(wchat);
-	clear_window(wchat);
 	// délai pour visualiser les changements
 	sleep(5);
-
+	// TODO à revirer
 	// création du message de départ du chat
 	generateLeave(message, "User wants to leave the channel");
 	write(socket_descriptor, message, strlen(message));
 	// END TODO
 
 	// on attend la fin du thread du handler avant de fermer le programme
-	wprintw(wchat, "waiting for the thread\n");
-	wrefresh(wchat);
-
 	pthread_join(thread_handler, NULL);
-
-	wprintw(wchat, "thread done\n");
-	wrefresh(wchat);
-	sleep(5);
 
 	// fin du programme
 	endwin();
 	delwin(wchat);
 	delwin(winput);
-	free(render_datas);
 	exit(0);
 }
