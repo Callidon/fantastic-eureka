@@ -18,7 +18,8 @@ void array_client_free(array_client_t * array_client) {
 	pthread_mutex_lock(&array_client->lock);
 	// free all the clients
 	for(i = 0; i < array_client->count; i++) {
-		pthread_exit(&array_client->clients[i]->client_thread);
+		pthread_cancel(array_client->clients[i]->client_thread);
+		close(array_client->clients[i]->socket);
 		free(array_client->clients[i]);
 	}
 	// cleanup the rest of the struct

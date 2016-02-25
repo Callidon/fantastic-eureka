@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 
 	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
 	generateLogin(message, username, "password");
-	write(socket_descriptor, message, strlen(message));
+	write(socket_descriptor, message, strlen(message) + 1);
 	clear_window(wchat);
 
 	// si l'accusé est bon, on passe en écran de sélection d'action
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 	// TODO à revirer
 	// création du message de départ du chat
 	generateLeave(message, "User wants to leave the channel");
-	write(socket_descriptor, message, strlen(message));
+	write(socket_descriptor, message, strlen(message) + 1);
 	// END TODO
 
 	// on attend la fin du thread du handler avant de fermer le programme

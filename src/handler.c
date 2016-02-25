@@ -32,7 +32,7 @@ void * server_handler(void * client_datas) {
 			case Multicast : {
 				// on transmet le message à chaque client
 				for(i = 0; i < datas->array_client->count; i++) {
-					write(datas->array_client->clients[i]->socket, message->text, sizeof(message->text));
+					write(datas->array_client->clients[i]->socket, message->text, strlen(message->text) + 1);
 				}
 			}
 				break;
@@ -43,13 +43,13 @@ void * server_handler(void * client_datas) {
 
 				// envoi d'un message de type 1 au client pour valider l'échange
 				generateAckLogin(response);
-				write(datas->socket, response, strlen(response));
+				write(datas->socket, response, strlen(response) + 1);
 				memset(response, 0, MAX_BUFFER_SIZE);
 				// multicast aux autres users pour leur signaler l'arrivée du nouvel user
 				generateMulticast(response, "user has join the channel");
 				for(i = 0; i < datas->array_client->count; i++) {
 					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response));
+						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
 					}
 				}
 
@@ -59,14 +59,14 @@ void * server_handler(void * client_datas) {
 			case Leave : {
 				// on signale au client q'il peut terminer la connexion de son côté
 				generateLeave(response, "user can leave the channel"); // TODO rajouter un message spécial type ack pour ça ?
-				write(datas->socket, response, strlen(response));
+				write(datas->socket, response, strlen(response) + 1);
 
 				// multicast d'un message pour annoncer le départ du client
 				memset(response, 0, MAX_BUFFER_SIZE);
 				generateMulticast(response, "user has leave the channel");
 				for(i = 0; i < datas->array_client->count; i++) {
 					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response));
+						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
 					}
 				}
 
@@ -84,7 +84,7 @@ void * server_handler(void * client_datas) {
 				generateMsg(response, message->username, message->text);
 				for(i = 0; i < datas->array_client->count; i++) {
 					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response));
+						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
 					}
 				}
 			}
@@ -101,7 +101,7 @@ void * server_handler(void * client_datas) {
 				}
 				// envoi du message au destinataire
 				generateWhisp(response, message->username, message->destinataire, message->text);
-				write(destinataire->socket, response, strlen(response));
+				write(destinataire->socket, response, strlen(response) + 1);
 			}
 				break;
 		}
