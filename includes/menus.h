@@ -49,6 +49,6 @@ void menu_say(WINDOW * win, char * message);
 /*
  * Fonction demandant la saisie d'un message privé dans une fenêtre ncurses
  */
-void menu_whisper(WINDOW * win, char * message);
+void menu_whisper(WINDOW * win, char * destinataire, char * message);
 
 #endif

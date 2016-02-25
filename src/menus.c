@@ -68,20 +68,11 @@ void menu_say(WINDOW * win, char * message) {
 /*
  * Fonction demandant la saisie d'un message privé dans une fenêtre ncurses
  */
-void menu_whisper(WINDOW * win, char * message) {
-	char destinataire[MAX_USERNAME_SIZE];
-	char text[MAX_MESSAGE_SIZE];
-
-	memset(destinataire, 0, MAX_USERNAME_SIZE);
-	memset(text, 0, MAX_MESSAGE_SIZE);
-
+void menu_whisper(WINDOW * win, char * destinataire, char * message) {
 	wprintw(win, "Destinataire : ");
 	wrefresh(win);
 	text_input(win, destinataire, MAX_USERNAME_SIZE);
 	wprintw(win, "Message : ");
 	wrefresh(win);
-	text_input(win, text, MAX_MESSAGE_SIZE);
-
-	memcpy(message, destinataire, strlen(destinataire));
-	memcpy(message + strlen(destinataire), text, strlen(text) + 1);
+	text_input(win, message, MAX_MESSAGE_SIZE);
 }

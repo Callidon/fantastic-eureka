@@ -29,8 +29,10 @@ int main(int argc, char **argv) {
     char buffer[MAX_BUFFER_SIZE];	/* buffer de réception des messages venant du serveur */
 	char message[MAX_BUFFER_SIZE];	/* message envoyé */
 	char username[MAX_USERNAME_SIZE]; /* nom d'utilisateur */
-    char *	prog; 			/* nom du programme */
-    char *	host; 			/* nom de la machine distante */
+	char destinataire[MAX_USERNAME_SIZE]; /* Nom du destinataire d'un message privé */
+	char * action;	/* Action désirée */
+    char *	prog;	/* nom du programme */
+    char *	host;	/* nom de la machine distante */
 	WINDOW * wchat, * winput; /* Fenêtres d'affichage */
 
 	memset(buffer, 0, MAX_BUFFER_SIZE);
@@ -105,35 +107,49 @@ int main(int argc, char **argv) {
 	// si l'accusé est bon, on passe en écran de sélection d'action
 
 	// sélection d'action :
-	// demande d'input selon un uméro d'un menu
-	// en fonction du numéro
-	// cas message :
-		// affichage du menu pour les messages
-		// envoi du message au serveur
-	// cas whisper :
-		// affichage du menu pour les whispers
-		// envoi du message au serveur
-	// cas de déconnexion :
-		// envoi le message de déconnexion au serveur
-		// nettoie le thread de client_handler
-		// nettoie ncruses
-		// nettoie les allocations
-		// exit(0);
+	// demande d'input selon un numéro d'un menu
+	for(;;) {
+		wprintw(winput, "Tapez le numéro correspondant à l'action désirée :\n");
+		wprintw(winput, "1 : Envoyer un message\n2 : Envoyer un message privé\n3 : Déconnexion\n");
+		wprintw(winput, "Action : ");
+		wrefresh(winput);
+		printf("%d\n", wgetch(winput));
+		// en fonction du numéro
+		switch(wgetch(winput)) {
+			// cas message
+			case 149 : {
+				menu_say(winput, buffer);
+				wrefresh(winput);
+				// envoi du message au serveur
+				generateMsg(message, username, buffer);
+				write(socket_descriptor, message, strlen(message) + 1);
+			}
+				break;
+			// cas whisper :
+			case 250 : {
+				menu_whisper(winput, destinataire, buffer);
+				wrefresh(winput);
+				// envoi du message au serveur
+				generateWhisp(message, username, destinataire, buffer);
+				write(socket_descriptor, message, strlen(message) + 1);
+			}
+				break;
+			// cas de déconnexion :
+			case 351 : {
+				generateLeave(message, "User wants to leave the channel");
+				write(socket_descriptor, message, strlen(message) + 1);
 
-	// délai pour visualiser les changements
-	sleep(5);
-	// TODO à revirer
-	// création du message de départ du chat
-	generateLeave(message, "User wants to leave the channel");
-	write(socket_descriptor, message, strlen(message) + 1);
-	// END TODO
+				// on attend la fin du thread du handler avant de fermer le programme
+				pthread_join(thread_handler, NULL);
 
-	// on attend la fin du thread du handler avant de fermer le programme
-	pthread_join(thread_handler, NULL);
-
-	// fin du programme
-	endwin();
-	delwin(wchat);
-	delwin(winput);
-	exit(0);
+				// fin du programme
+				endwin();
+				delwin(wchat);
+				delwin(winput);
+				exit(0);
+			}
+				break;
+		}
+		//clear_window(winput);
+	}
 }
