@@ -113,11 +113,15 @@ int main(int argc, char **argv) {
 		wprintw(winput, "1 : Envoyer un message\n2 : Envoyer un message privé\n3 : Déconnexion\n");
 		wprintw(winput, "Action : ");
 		wrefresh(winput);
-		printf("%d\n", wgetch(winput));
+		//ne pas getch deux fois
+		int tmp;
+		wprintw(winput, "Test : \n");
+		tmp = wgetch(winput);
+		wprintw(winput, "%d : \n",tmp);
 		// en fonction du numéro
-		switch(wgetch(winput)) {
+		switch(tmp) {
 			// cas message
-			case 149 : {
+			case 49 : {
 				menu_say(winput, buffer);
 				wrefresh(winput);
 				// envoi du message au serveur
@@ -126,7 +130,7 @@ int main(int argc, char **argv) {
 			}
 				break;
 			// cas whisper :
-			case 250 : {
+			case 50 : {
 				menu_whisper(winput, destinataire, buffer);
 				wrefresh(winput);
 				// envoi du message au serveur
@@ -135,7 +139,7 @@ int main(int argc, char **argv) {
 			}
 				break;
 			// cas de déconnexion :
-			case 351 : {
+			case 51 : {
 				generateLeave(message, "User wants to leave the channel");
 				write(socket_descriptor, message, strlen(message) + 1);
 
@@ -149,6 +153,10 @@ int main(int argc, char **argv) {
 				exit(0);
 			}
 				break;
+			default:{
+				wprintw(winput, "Action inconnue\n");
+				wprintw(winput, "%d : \n",tmp);
+			}
 		}
 		//clear_window(winput);
 	}
