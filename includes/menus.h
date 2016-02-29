@@ -42,6 +42,11 @@ void print_whisper(WINDOW * win, char * username, char * message);
 void menu_ask_username(WINDOW * win, char * username);
 
 /*
+ * Fonction demandant la saisie d'un mot de passe dans une fenêtre ncurses
+ */
+void menu_ask_password(WINDOW * win, char * password);
+
+/*
  * Fonction demandant la saisie d'un message dans une fenêtre ncurses
  */
 void menu_say(WINDOW * win, char * message);

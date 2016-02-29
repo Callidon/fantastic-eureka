@@ -29,9 +29,9 @@ int main(int argc, char **argv) {
     char buffer[MAX_BUFFER_SIZE];	/* buffer de réception des messages venant du serveur */
 	char message[MAX_BUFFER_SIZE];	/* message envoyé */
 	char username[MAX_USERNAME_SIZE]; /* nom d'utilisateur */
+	char password[MAX_PASSWORD_SIZE]; /* Mot de passe */
 	char destinataire[MAX_USERNAME_SIZE]; /* Nom du destinataire d'un message privé */
 	char * action;	/* Action désirée */
-    char *	prog;	/* nom du programme */
     char *	host;	/* nom de la machine distante */
 	WINDOW * wchat, * winput; /* Fenêtres d'affichage */
 
@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 		exit(1);
     }
 
-    prog = argv[0];
     host = argv[1];
 
     printf("adresse du serveur  : %s \n", host);
@@ -94,18 +93,20 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	// demande de l'username
+	// demande de l'username & du password tant que l'on n'est pas connecté
+	int success_login = 0;
 	menu_ask_username(winput, username);
-	wprintw(wchat, "username tapé : %s\n", username);
+	wrefresh(wchat);
+	menu_ask_password(winput, password);
 	wrefresh(wchat);
 
 	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
-	generateLogin(message, username, "password");
+	generateLogin(message, username, password);
 	write(socket_descriptor, message, strlen(message) + 1);
 	clear_window(wchat);
 
-	// si l'accusé est bon, on passe en écran de sélection d'action
-
+	wprintw(wchat, "Connecté en tant que %s", username);
+	wrefresh(wchat);
 	// sélection d'action :
 	// demande d'input selon un numéro d'un menu
 	for(;;) {
@@ -113,15 +114,11 @@ int main(int argc, char **argv) {
 		wprintw(winput, "1 : Envoyer un message\n2 : Envoyer un message privé\n3 : Déconnexion\n");
 		wprintw(winput, "Action : ");
 		wrefresh(winput);
-		//ne pas getch deux fois
-		int tmp;
-		wprintw(winput, "Test : \n");
-		tmp = wgetch(winput);
-		wprintw(winput, "%d : \n",tmp);
 		// en fonction du numéro
-		switch(tmp) {
+		switch(wgetch(winput)) {
 			// cas message
 			case 49 : {
+				wprintw(winput, "\n");
 				menu_say(winput, buffer);
 				wrefresh(winput);
 				// envoi du message au serveur
@@ -131,6 +128,7 @@ int main(int argc, char **argv) {
 				break;
 			// cas whisper :
 			case 50 : {
+				wprintw(winput, "\n");
 				menu_whisper(winput, destinataire, buffer);
 				wrefresh(winput);
 				// envoi du message au serveur
@@ -154,10 +152,11 @@ int main(int argc, char **argv) {
 			}
 				break;
 			default:{
+				wprintw(winput, "\n");
+				menu_say(winput, buffer);
 				wprintw(winput, "Action inconnue\n");
-				wprintw(winput, "%d : \n",tmp);
 			}
 		}
-		//clear_window(winput);
+		clear_window(winput);
 	}
 }

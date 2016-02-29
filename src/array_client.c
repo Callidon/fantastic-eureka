@@ -42,6 +42,7 @@ int array_client_add(array_client_t * array_client, int client_socket) {
 
 	client_t * new_client = malloc(sizeof(client_t));
 	new_client->socket = client_socket;
+	new_client->is_logged = 0;
 	memset(new_client->username, 0, MAX_USERNAME_SIZE);
 	pthread_mutex_init(&new_client->lock, NULL);
 	array_client->clients[array_client->count] = new_client;

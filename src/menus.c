@@ -57,6 +57,15 @@ void menu_ask_username(WINDOW * win, char * username) {
 }
 
 /*
+ * Fonction demandant la saisie d'un mot de passe dans une fenêtre ncurses
+ */
+void menu_ask_password(WINDOW * win, char * password) {
+	wprintw(win, "Mot de passe : ");
+	wrefresh(win);
+	text_input(win, password, MAX_PASSWORD_SIZE);
+}
+
+/*
  * Fonction demandant la saisie d'un message dans une fenêtre ncurses
  */
 void menu_say(WINDOW * win, char * message) {

@@ -48,6 +48,11 @@ typedef struct {
 } message_parsed_t;
 
 /*
+ * Fonction de concaténation de deux chaînes de caractères
+ */
+void concat(char * buffer, char * left, char * right);
+
+/*
  * Methode qui renvoie une structure a partir d'un message afin de le traiter dans le serveur
  */
 message_parsed_t * decode(char* msg);
@@ -78,9 +83,9 @@ void generateMsg(char* resp,char* username ,char* msg);
 void generateWhisp(char* resp,char* username, char* destinataire, char* msg);
 
 /*
- * Methode qui renvoie un aquittement quand le client est authorisé a se connecter
+ * Methode qui renvoie un aquittement quand le client a essayé de se connecter
  */
-void generateAckLogin(char* resp);
+void generateAckLogin(char* resp, int code);
 
 /*
  * Méthode libérant une structure message_parsed_t

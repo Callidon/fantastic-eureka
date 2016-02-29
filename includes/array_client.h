@@ -14,6 +14,7 @@
 // Structure représentant un client
 typedef struct {
 	int socket;
+	int is_logged;
 	char username [MAX_USERNAME_SIZE];
 	pthread_t client_thread;
 	pthread_mutex_t lock;

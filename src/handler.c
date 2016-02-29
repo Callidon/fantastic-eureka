@@ -8,21 +8,21 @@ void * server_handler(void * client_datas) {
 	client_datas_t * datas = (client_datas_t *) client_datas;
     char buffer[MAX_BUFFER_SIZE];
 	char response[MAX_BUFFER_SIZE];
+	char temp_buffer[MAX_BUFFER_SIZE];
     int i,
 		longueur,
 		client_ind;
 
+	memset(buffer, 0, MAX_BUFFER_SIZE);
+	memset(response, 0, MAX_BUFFER_SIZE);
+	memset(temp_buffer, 0, MAX_BUFFER_SIZE);
+
 	for(;;) {
-		memset(buffer, 0, MAX_BUFFER_SIZE);
-		memset(response, 0, MAX_BUFFER_SIZE);
 
 		// lecture du message rentrant
-	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
+	    if ((longueur = read(datas->client->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
-
-		// TODO à supprimer
-		printf("DEBUG - message lu : %s \n", buffer);
 
 		// on décode le message
 		message_parsed_t * message = decode(buffer);
@@ -30,60 +30,80 @@ void * server_handler(void * client_datas) {
 		switch(message->code) {
 			// cas d'un message de multicast
 			case Multicast : {
-				// on transmet le message à chaque client
-				for(i = 0; i < datas->array_client->count; i++) {
-					write(datas->array_client->clients[i]->socket, message->text, strlen(message->text) + 1);
+				if(datas->client->is_logged) {
+					// on transmet le message à chaque client
+					for(i = 0; i < datas->array_client->count; i++) {
+						write(datas->array_client->clients[i]->socket, message->text, strlen(message->text) + 1);
+					}
 				}
 			}
 				break;
 			// cas d'un message de connexion
 			case Login: {
-				// set de l'username du client
-				array_client_setName(datas->array_client, datas->socket, message->username);
+				if(! datas->client->is_logged) {
+					// si le mot de passe est correct
+					if(strcmp(message->password, datas->server_password) == 0) {
+						// set de l'username du client
+						array_client_setName(datas->array_client, datas->client->socket, message->username);
+						memcpy(datas->client->username, message->username, strlen(message->username) + 1);
 
-				// envoi d'un message de type 1 au client pour valider l'échange
-				generateAckLogin(response);
-				write(datas->socket, response, strlen(response) + 1);
-				memset(response, 0, MAX_BUFFER_SIZE);
-				// multicast aux autres users pour leur signaler l'arrivée du nouvel user
-				generateMulticast(response, "user has join the channel");
-				for(i = 0; i < datas->array_client->count; i++) {
-					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
+						// envoi d'un message de type 1 au client pour valider l'échange
+						generateAckLogin(response, 1);
+						write(datas->client->socket, response, strlen(response) + 1);
+
+						// multicast aux autres users pour leur signaler l'arrivée du nouvel user
+						concat(temp_buffer, message->username, " has join the channel");
+						memset(response, 0, MAX_BUFFER_SIZE);
+						generateMulticast(response, temp_buffer);
+						for(i = 0; i < datas->array_client->count; i++) {
+							if(datas->array_client->clients[i]->socket != datas->client->socket) {
+								write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
+							}
+						}
+
+						// on signale que le client est identifié
+						datas->client->is_logged = 1;
+					} else {
+						// envoi d'un message d'erreur au client
+						generateAckLogin(response, 0);
+						write(datas->client->socket, response, strlen(response) + 1);
 					}
 				}
-
 			}
 				break;
 			// cas d'un message de déconnexion
 			case Leave : {
-				// on signale au client q'il peut terminer la connexion de son côté
-				generateLeave(response, "user can leave the channel"); // TODO rajouter un message spécial type ack pour ça ?
-				write(datas->socket, response, strlen(response) + 1);
+				if(datas->client->is_logged) {
+					// on signale au client q'il peut terminer la connexion de son côté
+					generateLeave(response, "user can leave the channel");
+					write(datas->client->socket, response, strlen(response) + 1);
 
-				// multicast d'un message pour annoncer le départ du client
-				memset(response, 0, MAX_BUFFER_SIZE);
-				generateMulticast(response, "user has leave the channel");
-				for(i = 0; i < datas->array_client->count; i++) {
-					if(datas->array_client->clients[i]->socket != datas->socket) {
-						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
+					// multicast d'un message pour annoncer le départ du client
+					concat(temp_buffer, message->username, " has leave the channel");
+					memset(response, 0, MAX_BUFFER_SIZE);
+					generateMulticast(response, temp_buffer);
+
+					for(i = 0; i < datas->array_client->count; i++) {
+						if(datas->array_client->clients[i]->socket != datas->client->socket) {
+							write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
+						}
 					}
+
+					// on termine la connexion avec le client
+					close(datas->client->socket);
+					array_client_delete(datas->array_client, datas->client->socket);
+
+					free(datas);
+					pthread_exit(0);
 				}
-
-				// on termine la connexion avec le client
-				close(datas->socket);
-				array_client_delete(datas->array_client, datas->socket);
-
-				free(datas);
-				pthread_exit(0);
 			}
 				break;
 			// cas d'un message classique
 			case Say : {
-				// transmission du message aux autres clients
-				generateMsg(response, message->username, message->text);
-				for(i = 0; i < datas->array_client->count; i++) {
-					if(datas->array_client->clients[i]->socket != datas->socket) {
+				if(datas->client->is_logged) {
+					// transmission du message aux autres clients
+					generateMsg(response, message->username, message->text);
+					for(i = 0; i < datas->array_client->count; i++) {
 						write(datas->array_client->clients[i]->socket, response, strlen(response) + 1);
 					}
 				}
@@ -91,17 +111,25 @@ void * server_handler(void * client_datas) {
 				break;
 			//  cas d'un message de privé
 			case Whisper : {
-				// recherche du destinataire via son username
-				client_t * destinataire;
-				for(i = 0; i < datas->array_client->count; i++) {
-					if(strcmp(datas->array_client->clients[i]->username, message->destinataire)) {
-						destinataire = datas->array_client->clients[i];
-						break;
+				if(datas->client->is_logged) {
+					// recherche du destinataire via son username
+					client_t * destinataire = NULL;
+					for(i = 0; i < datas->array_client->count; i++) {
+						if(strcmp(datas->array_client->clients[i]->username, message->destinataire) == 0) {
+							destinataire = datas->array_client->clients[i];
+							break;
+						}
+					}
+					// envoi du message au destinataire si ce dernier existe
+					if(destinataire != NULL) {
+						generateWhisp(response, message->username, message->destinataire, message->text);
+						write(destinataire->socket, response, strlen(response) + 1);
+					} else {
+						// envoi d'un message d'erreur au client
+						generateMulticast(response, "Erreur , le destinataire en question n'existe pas");
+						write(datas->client->socket, response, strlen(response) + 1);
 					}
 				}
-				// envoi du message au destinataire
-				generateWhisp(response, message->username, message->destinataire, message->text);
-				write(destinataire->socket, response, strlen(response) + 1);
 			}
 				break;
 		}
@@ -119,18 +147,15 @@ void * client_handler(void * render_datas) {
     int i,
 		longueur;
 
+	memset(buffer, 0, MAX_BUFFER_SIZE);
+	memset(response, 0, MAX_BUFFER_SIZE);
+
 	for(;;) {
-		memset(buffer, 0, MAX_BUFFER_SIZE);
-		memset(response, 0, MAX_BUFFER_SIZE);
 
 		// lecture du message entrant
 	    if ((longueur = read(datas->socket, buffer, sizeof(buffer))) <= 0) {
 		    return;
 		}
-
-		// TODO à supprimer
-		wprintw(datas->window, "DEBUG - message lu : %s \n", buffer);
-		wrefresh(datas->window);
 
 		// on décode le message
 		message_parsed_t * message = decode(buffer);
@@ -159,6 +184,8 @@ void * client_handler(void * render_datas) {
 			case Whisper : {
 				print_whisper(datas->window, message->username, message->text);
 			}
+				break;
+			default :
 				break;
 		}
 		wrefresh(datas->window);

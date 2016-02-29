@@ -19,7 +19,8 @@
 #include "menus.h"
 
 typedef struct {
-	int socket;
+	client_t * client;
+	char * server_password;
 	array_client_t * array_client;
 } client_datas_t;
 

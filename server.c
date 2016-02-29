@@ -42,6 +42,14 @@ main(int argc, char **argv) {
     hostent* ptr_hote; 			/* les infos recuperees sur la machine hote */
     servent* ptr_service; 			/* les infos recuperees sur le service de la machine */
     char machine[MAX_BUFFER_SIZE+1]; 	/* nom de la machine locale */
+	char * password;	/* Mot de passe du serveur */
+
+	if (argc != 2) {
+		perror("usage : server <mot-de-passe-serveur>");
+		exit(1);
+    }
+
+    password = argv[1];
 
 	// bind du CTRl+C pour arrêter proprement le serveur
 	signal(SIGINT, stop);
@@ -101,13 +109,12 @@ main(int argc, char **argv) {
 			perror("erreur : impossible d'accepter la connexion avec le client.");
 			error_stop();
 		}
-		// TODO à supprimer
-		printf("DEBUG - nouveau client connecté\n");
 
 		// création du nouveau client
 		int client_ind = array_client_add(array_client, nouv_socket_descriptor);
 		client_datas_t * datas = malloc(sizeof(client_datas_t));
-		datas->socket = nouv_socket_descriptor;
+		datas->client = array_client->clients[client_ind];
+		datas->server_password = password;
 		datas->array_client = array_client;
 
 		// lancement du handler chargé de gérer les interactions du nouveau client
