@@ -74,6 +74,7 @@ message_parsed_t * decode(char * msg){
 
 		case 5 :
 		msg_prd->code = AckLogin;
+		token = strtok(NULL,";");
 		msg_prd->text = strdup(token);
 		msg_prd->username = NULL;
 		msg_prd->password = NULL;
@@ -139,7 +140,7 @@ void generateWhisp(char* resp,char* username, char* destinataire, char* msg){
  */
 void generateAckLogin(char* resp, int code){
 	memcpy(resp, "5;", 2);
-	if(code = 1) {
+	if(code == 1) {
 		memcpy(resp + 2, "1\0", 2);
 	} else {
 		memcpy(resp + 2, "0\0", 2);

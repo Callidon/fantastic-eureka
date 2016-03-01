@@ -22,23 +22,26 @@ render_datas_t * render_datas; /* données à passer au thread de rendu */
 
 int main(int argc, char **argv) {
 
-    int longueur; 		/* longueur d'un buffer utilisé */
+    int longueur,			/* longueur d'un buffer utilisé */
+		successful_login = 0;	/* Booléen indiquant si l'authentifgication s'est faite avec succès */
     sockaddr_in adresse_locale; 	/* adresse de socket local */
     hostent *	ptr_host; 		/* info sur une machine hote */
     servent *	ptr_service; 		/* info sur service */
-    char buffer[MAX_BUFFER_SIZE];	/* buffer de réception des messages venant du serveur */
-	char message[MAX_BUFFER_SIZE];	/* message envoyé */
-	char username[MAX_USERNAME_SIZE]; /* nom d'utilisateur */
-	char password[MAX_PASSWORD_SIZE]; /* Mot de passe */
-	char destinataire[MAX_USERNAME_SIZE]; /* Nom du destinataire d'un message privé */
+    char buffer[MAX_BUFFER_SIZE],	/* buffer de réception des messages venant du serveur */
+		message[MAX_BUFFER_SIZE],	/* message envoyé */
+		username[MAX_USERNAME_SIZE], /* nom d'utilisateur */
+		password[MAX_PASSWORD_SIZE], /* Mot de passe */
+		destinataire[MAX_USERNAME_SIZE]; /* Nom du destinataire d'un message privé */
 	char * action;	/* Action désirée */
     char *	host;	/* nom de la machine distante */
-	WINDOW * wchat, * winput; /* Fenêtres d'affichage */
+	WINDOW 	* wchat, /* Pointeur vers la fenêtre d'affichage du chat */
+			* winput; /* Pointeur vers la fenêtre d'es inputs utilisateurs */
 
 	memset(buffer, 0, MAX_BUFFER_SIZE);
 	memset(message, 0, MAX_BUFFER_SIZE);
 	memset(username, 0, MAX_USERNAME_SIZE);
 
+	// vérification et récupération des arguments
     if (argc != 2) {
 		perror("usage : client <adresse-serveur>");
 		exit(1);
@@ -88,24 +91,38 @@ int main(int argc, char **argv) {
 	render_datas = malloc(sizeof(render_datas_t));
 	render_datas->window = wchat;
 	render_datas->socket = socket_descriptor;
+	render_datas->successful_login = &successful_login;
+	pthread_mutex_init(&render_datas->login_mutex, NULL);
 	if(pthread_create(&thread_handler, NULL, client_handler, render_datas) < 0) {
 		perror("erreur : impossible de créer un nouveau thread");
 		exit(1);
 	}
 
-	// demande de l'username & du password tant que l'on n'est pas connecté
-	int success_login = 0;
-	menu_ask_username(winput, username);
-	wrefresh(wchat);
-	menu_ask_password(winput, password);
-	wrefresh(wchat);
+	while(! successful_login) {
+		// on lock le mutex lié au login
+		pthread_mutex_lock(&render_datas->login_mutex);
 
-	// envoi un message de type login au serveur (password écrit en dur pour l'instant)
-	generateLogin(message, username, password);
-	write(socket_descriptor, message, strlen(message) + 1);
-	clear_window(wchat);
+		// demande de l'username & du password tant que l'on n'est pas connecté
+		menu_ask_username(winput, username);
+		wrefresh(wchat);
+		menu_ask_password(winput, password);
+		wrefresh(wchat);
 
-	wprintw(wchat, "Connecté en tant que %s", username);
+		// envoi un message de type login au serveur (password écrit en dur pour l'instant)
+		generateLogin(message, username, password);
+		write(socket_descriptor, message, strlen(message) + 1);
+		clear_window(winput);
+
+		// on attend une modif sur le booléen successful_login
+		pthread_mutex_lock(&render_datas->login_mutex);
+
+		if(! successful_login) {
+			wprintw(winput, "Erreur : mot de passe incorrect. Veuillez essayer à nouveau\n");
+			wrefresh(winput);
+		}
+	}
+
+	wprintw(wchat, "Connecté en tant que %s\n", username);
 	wrefresh(wchat);
 	// sélection d'action :
 	// demande d'input selon un numéro d'un menu

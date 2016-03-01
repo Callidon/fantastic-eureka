@@ -26,7 +26,9 @@ typedef struct {
 
 typedef struct {
 	int socket;
+	int * successful_login;
 	WINDOW *window;
+	pthread_mutex_t login_mutex;
 } render_datas_t;
 
 /*

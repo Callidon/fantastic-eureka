@@ -185,6 +185,13 @@ void * client_handler(void * render_datas) {
 				print_whisper(datas->window, message->username, message->text);
 			}
 				break;
+			case AckLogin : {
+				if(atoi(message->text) == 1) {
+					*datas->successful_login = 1;
+				}
+				pthread_mutex_unlock(&datas->login_mutex);
+			}
+				break;
 			default :
 				break;
 		}
