@@ -7,6 +7,7 @@ client <adresse-serveur> <message-a-transmettre>
 #include <linux/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <string.h>
 #include "config.h"
 #include "handler.h"
@@ -23,6 +24,7 @@ render_datas_t * render_datas; /* données à passer au thread de rendu */
 int main(int argc, char **argv) {
 
     int longueur,			/* longueur d'un buffer utilisé */
+		fileDescriptors[2],
 		successful_login = 0;	/* Booléen indiquant si l'authentifgication s'est faite avec succès */
     sockaddr_in adresse_locale; 	/* adresse de socket local */
     hostent *	ptr_host; 		/* info sur une machine hote */
@@ -50,6 +52,8 @@ int main(int argc, char **argv) {
     host = argv[1];
 
     printf("adresse du serveur  : %s \n", host);
+
+	pipe(fileDescriptors);
 
     if ((ptr_host = gethostbyname(host)) == NULL) {
 		perror("erreur : impossible de trouver le serveur a partir de son adresse.");
@@ -91,16 +95,13 @@ int main(int argc, char **argv) {
 	render_datas = malloc(sizeof(render_datas_t));
 	render_datas->window = wchat;
 	render_datas->socket = socket_descriptor;
-	render_datas->successful_login = &successful_login;
-	pthread_mutex_init(&render_datas->login_mutex, NULL);
+	render_datas->fileDescriptor = fileDescriptors[1];
 	if(pthread_create(&thread_handler, NULL, client_handler, render_datas) < 0) {
 		perror("erreur : impossible de créer un nouveau thread");
 		exit(1);
 	}
 
 	while(! successful_login) {
-		// on lock le mutex lié au login
-		pthread_mutex_lock(&render_datas->login_mutex);
 
 		// demande de l'username & du password tant que l'on n'est pas connecté
 		menu_ask_username(winput, username);
@@ -113,12 +114,12 @@ int main(int argc, char **argv) {
 		write(socket_descriptor, message, strlen(message) + 1);
 		clear_window(winput);
 
-		// on attend une modif sur le booléen successful_login
-		pthread_mutex_lock(&render_datas->login_mutex);
+		read(fileDescriptors[0], buffer, sizeof(buffer));
 
-		if(! successful_login) {
-			wprintw(winput, "Erreur : mot de passe incorrect. Veuillez essayer à nouveau\n");
-			wrefresh(winput);
+		if(atoi(buffer) == 1) {
+			successful_login = 1;
+		} else {
+			wprintw(winput, "Erreur : mot de passe incorrect. Veuillez réessayer\n");
 		}
 	}
 

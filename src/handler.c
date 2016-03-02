@@ -187,9 +187,10 @@ void * client_handler(void * render_datas) {
 				break;
 			case AckLogin : {
 				if(atoi(message->text) == 1) {
-					*datas->successful_login = 1;
+					write(datas->fileDescriptor, message->text, strlen(message->text) + 1);
+				} else {
+					write(datas->fileDescriptor, "0", 2);
 				}
-				pthread_mutex_unlock(&datas->login_mutex);
 			}
 				break;
 			default :
