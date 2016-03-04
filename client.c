@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 				break;
 			// cas de déconnexion :
 			case 51 : {
-				generateLeave(message, "User wants to leave the channel");
+				generateLeave(message, username->password);
 				write(socket_descriptor, message, strlen(message) + 1);
 
 				// on attend la fin du thread du handler avant de fermer le programme
