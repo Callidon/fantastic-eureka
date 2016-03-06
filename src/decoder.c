@@ -1,3 +1,7 @@
+/*
+ * Structures et fonctions relatives aux decodage des messages par le serveur
+ * Auteurs : Pierre Gaultier & Thomas Minier
+ */
 #include "decoder.h"
 
 /*
@@ -12,76 +16,72 @@ void concat(char * buffer, char * left, char * right) {
 * Methode qui renvoie une structure a partir d'un message afin de le traiter dans le serveur
 */
 message_parsed_t * decode(char * msg){
-
-	char * s1;
-	char * s2;
-	char * s3;
+	message_parsed_t * msg_prd;
 	char * token;
-	token = strtok(msg,";");
 
-	message_parsed_t *msg_prd = malloc(sizeof(message_parsed_t));
+	token = strtok(msg,";");
+	msg_prd = malloc(sizeof(message_parsed_t));
 
 	switch(atoi(token)){
-
+		/* Cas message de type Multicast */
 		case 0 :
-		msg_prd->code = Multicast;
-		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
-		msg_prd->username = NULL;
-		msg_prd->password = NULL;
-		msg_prd->destinataire = NULL;
-		break;
-
+			msg_prd->code = Multicast;
+			token = strtok(NULL,";");
+			msg_prd->text = strdup(token);
+			msg_prd->username = NULL;
+			msg_prd->password = NULL;
+			msg_prd->destinataire = NULL;
+			break;
+		/* Cas message de type Login */
 		case 1 :
-		msg_prd->code = Login;
-		token = strtok(NULL,";");
-		msg_prd->text = NULL;
-		msg_prd->username = strdup(token);
-		token = strtok(NULL,";");
-		msg_prd->password = strdup(token);
-		msg_prd->destinataire = NULL;
-		break;
-
+			msg_prd->code = Login;
+			token = strtok(NULL,";");
+			msg_prd->text = NULL;
+			msg_prd->username = strdup(token);
+			token = strtok(NULL,";");
+			msg_prd->password = strdup(token);
+			msg_prd->destinataire = NULL;
+			break;
+		/* Cas message de type Leave */
 		case 2 :
-		msg_prd->code = Leave;
-		token = strtok(NULL,";");
-		msg_prd->text = NULL;
-		msg_prd->username = strdup(token);
-		msg_prd->password = NULL;
-		msg_prd->destinataire = NULL;
-		break;
-
+			msg_prd->code = Leave;
+			token = strtok(NULL,";");
+			msg_prd->text = NULL;
+			msg_prd->username = strdup(token);
+			msg_prd->password = NULL;
+			msg_prd->destinataire = NULL;
+			break;
+		/* Cas message de type Say */
 		case 3 :
-		msg_prd->code = Say;
-		token = strtok(NULL,";");
-		msg_prd->username = strdup(token);
-		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
-		msg_prd->password = NULL;
-		msg_prd->destinataire = NULL;
-		break;
-
+			msg_prd->code = Say;
+			token = strtok(NULL,";");
+			msg_prd->username = strdup(token);
+			token = strtok(NULL,";");
+			msg_prd->text = strdup(token);
+			msg_prd->password = NULL;
+			msg_prd->destinataire = NULL;
+			break;
+		/* Cas message de type Whisper */
 		case 4 :
-		msg_prd->code = Whisper;
-		token = strtok(NULL,";");
-		msg_prd->username = strdup(token);
-		msg_prd->password = NULL;
-		token = strtok(NULL,";");
-		msg_prd->destinataire = strdup(token);
-		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
-		break;
-
+			msg_prd->code = Whisper;
+			token = strtok(NULL,";");
+			msg_prd->username = strdup(token);
+			msg_prd->password = NULL;
+			token = strtok(NULL,";");
+			msg_prd->destinataire = strdup(token);
+			token = strtok(NULL,";");
+			msg_prd->text = strdup(token);
+			break;
+		/* Cas message de type AckLogin */
 		case 5 :
-		msg_prd->code = AckLogin;
-		token = strtok(NULL,";");
-		msg_prd->text = strdup(token);
-		msg_prd->username = NULL;
-		msg_prd->password = NULL;
-		msg_prd->destinataire = NULL;
-		break;
+			msg_prd->code = AckLogin;
+			token = strtok(NULL,";");
+			msg_prd->text = strdup(token);
+			msg_prd->username = NULL;
+			msg_prd->password = NULL;
+			msg_prd->destinataire = NULL;
+			break;
 	}
-
 	return  msg_prd;
 }
 

@@ -37,6 +37,11 @@ void print_message(WINDOW * win, char * username, char * message);
 void print_whisper(WINDOW * win, char * username, char * message);
 
 /*
+ * Fonction affichant un accusé d'envoi d'un message privé dans une fenêtre ncurses
+ */
+void print_ack_whisper(WINDOW * win, char * username, char * message);
+
+/*
  * Fonction demandant la saisie d'un nom d'utilisateur dans une fenêtre ncurses
  */
 void menu_ask_username(WINDOW * win, char * username);

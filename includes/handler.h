@@ -8,22 +8,24 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <linux/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
+#include <unistd.h>
 #include "config.h"
 #include "decoder.h"
 #include "array_client.h"
 #include "menus.h"
 
+/* Structure représentant les données utilisées par un thread de traitement des messages */
 typedef struct {
 	client_t * client;
 	char * server_password;
 	array_client_t * array_client;
 } client_datas_t;
 
+/* Structure représentant les données utilisées par un thread d'écoute */
 typedef struct {
 	int socket;
 	int fileDescriptor;

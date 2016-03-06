@@ -5,16 +5,16 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Nombre max de caractères dans un message réseau
+/* Nombre max de caractères dans un message réseau */
 #define MAX_BUFFER_SIZE 256
 
-// Nombre max de caractères dans un nom d'utilisateur
+/* Nombre max de caractères dans un nom d'utilisateur */
 #define MAX_USERNAME_SIZE 100
 
-// Nombre max de caractères dans un mot de passe
+/* Nombre max de caractères dans un mot de passe */
 #define MAX_PASSWORD_SIZE 100
 
-// Nombre max de caractères dans un message
+/* Nombre max de caractères dans un message */
 #define MAX_MESSAGE_SIZE 100
 
 #endif

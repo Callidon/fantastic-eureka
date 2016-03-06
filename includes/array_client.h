@@ -2,16 +2,17 @@
  * Structures et fonctions relatives à une collection de clients
  * Auteurs : Pierre Gaultier & Thomas Minier
  */
- #include <stdlib.h>
- #include <pthread.h>
- #include <string.h>
- #include "config.h"
 
 #ifndef ARRAY_CLIENT_H
 #define ARRAY_CLIENT_H
 
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
+#include <unistd.h>
+#include "config.h"
 
-// Structure représentant un client
+/* Structure représentant un client */
 typedef struct {
 	int socket;
 	int is_logged;
@@ -20,7 +21,7 @@ typedef struct {
 	pthread_mutex_t lock;
 } client_t;
 
-// Structure représentant une collection de clients
+/* Structure représentant une collection de clients */
 typedef struct {
 	size_t size;
 	size_t count;

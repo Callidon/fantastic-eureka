@@ -3,32 +3,14 @@
  * Auteurs : Pierre Gaultier & Thomas Minier
  */
 
-/*TODO: TEST / MODIF */
-
-/*
-message :
-code;datas
-
-0 = multicast => texte
-1 = login => username;password
-2 = leave => username
-3 = msg => username;texte;
-4 = mp => username;destinataire;texte
-
-contraintes sur la taille du username/destinataire, du password et du message (max 250)
-
-Exemple de message : 1;Pierre;123456  3;Thomas;Bonjour
-*/
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "config.h"
-
 #ifndef DECODER_H
 #define DECODER_H
 
-// Enum représentant le type d'un message
+#include <stdlib.h>
+#include <string.h>
+#include "config.h"
+
+/* Enum représentant le type d'un message */
 typedef enum {
 	Multicast,
 	Login,
@@ -38,7 +20,7 @@ typedef enum {
 	AckLogin
 } MSGType;
 
-// Structure représentant un message une fois parsé
+/* Structure représentant un message une fois parsé */
 typedef struct {
 	MSGType code;
 	char *text;

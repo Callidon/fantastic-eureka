@@ -1,14 +1,19 @@
+/*
+ * Structures et fonctions relatives à la manipulation des fenêtres ncurses
+ * Auteurs : Pierre Gaultier & Thomas Minier
+ */
 #include "menus.h"
 
 /*
  * Fonction effectuant une saisie de texte dans une fenêtre ncurses
  */
 void text_input(WINDOW * win, char * message, size_t max_char) {
+	char * end_char;
 	wgetnstr(win, message, max_char);
-	// remplacement du retour chariot par un terminateur
-	char *p = strchr(message, '\n');
-    if(p) {
-		*p = '\0';
+	/* remplacement du retour chariot par un terminateur */
+	end_char = strchr(message, '\n');
+    if(end_char) {
+		*end_char = '\0';
 	}
 }
 
@@ -25,7 +30,7 @@ void clear_window(WINDOW * win) {
  */
 void print_multicast(WINDOW * win, char * message) {
 	time_t now = time(0);
-	wprintw(win, "[%s] - %s\n", ctime(&now), message);
+	wprintw(win, "%s %s\n", ctime(&now), message);
 	wrefresh(win);
 }
 
@@ -34,7 +39,7 @@ void print_multicast(WINDOW * win, char * message) {
  */
 void print_message(WINDOW * win, char * username, char * message) {
 	time_t now = time(0);
-	wprintw(win, "[%s] - %s : %s\n", ctime(&now), username, message);
+	wprintw(win, "%s %s : %s\n", ctime(&now), username, message);
 	wrefresh(win);
 }
 
@@ -43,7 +48,16 @@ void print_message(WINDOW * win, char * username, char * message) {
  */
 void print_whisper(WINDOW * win, char * username, char * message) {
 	time_t now = time(0);
-	wprintw(win, "[%s] - whisper from %s : %s\n", ctime(&now), username, message);
+	wprintw(win, "%s whisper from %s : %s\n", ctime(&now), username, message);
+	wrefresh(win);
+}
+
+/*
+ * Fonction affichant un accusé d'envoi d'un message privé dans une fenêtre ncurses
+ */
+void print_ack_whisper(WINDOW * win, char * username, char * message) {
+	time_t now = time(0);
+	wprintw(win, "%s whisper to %s : %s\n", ctime(&now), username, message);
 	wrefresh(win);
 }
 

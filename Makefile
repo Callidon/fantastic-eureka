@@ -1,9 +1,9 @@
 LDLIBS = -pthread -lncurses
-CFLAGS = -I./includes
+CFLAGS = -I./includes -Wall
 SOURCES = src/handler.c src/array_client.c src/decoder.c src/menus.c
 .PHONY: clean
 
-all: client server 
+all: client server
 
 client: $(SOURCES:.c=.o)
 

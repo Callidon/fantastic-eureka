@@ -1,4 +1,9 @@
+/*
+ * Structures et fonctions relatives à une collection de clients
+ * Auteurs : Pierre Gaultier & Thomas Minier
+ */
 #include "array_client.h"
+
 /*
  * Initialise une collection de clients
  */
@@ -16,13 +21,13 @@ void array_client_init(array_client_t * array_client, size_t size) {
 void array_client_free(array_client_t * array_client) {
 	int i;
 	pthread_mutex_lock(&array_client->lock);
-	// free all the clients
+	/* free all the clients */
 	for(i = 0; i < array_client->count; i++) {
 		pthread_cancel(array_client->clients[i]->client_thread);
 		close(array_client->clients[i]->socket);
 		free(array_client->clients[i]);
 	}
-	// cleanup the rest of the struct
+	/* cleanup the rest of the struct */
 	free(array_client->clients);
 	pthread_mutex_unlock(&array_client->lock);
 	free(array_client);
@@ -32,15 +37,17 @@ void array_client_free(array_client_t * array_client) {
  * Ajoute un client à une collection de clients
  */
 int array_client_add(array_client_t * array_client, int client_socket) {
+	client_t * new_client;
+	
 	pthread_mutex_lock(&array_client->lock);
 
-	// Si la tableau est plein, on l'agrandit
+	/* Si la tableau est plein, on l'agrandit */
 	if(array_client->count == array_client->size) {
 		array_client->size *= 2;
 		array_client->clients = realloc(array_client->clients, array_client->size * sizeof(client_t));
 	}
 
-	client_t * new_client = malloc(sizeof(client_t));
+	new_client = malloc(sizeof(client_t));
 	new_client->socket = client_socket;
 	new_client->is_logged = 0;
 	memset(new_client->username, 0, MAX_USERNAME_SIZE);
@@ -60,7 +67,7 @@ int array_client_setName(array_client_t * array_client, int client_socket, char 
 	int client_ind;
 	pthread_mutex_lock(&array_client->lock);
 
-	// recherche du client en question
+	/* recherche du client en question */
 	for(i = 0; i < array_client->count; i++) {
 		if(array_client->clients[i]->socket == client_socket) {
 			pthread_mutex_lock(&array_client->clients[i]->lock);
@@ -83,7 +90,7 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 	client_t * client;
 	pthread_mutex_lock(&array_client->lock);
 
-	// recherche du client en question
+	/* recherche du client en question */
 	for(i = 0; i < array_client->count; i++) {
 		if(array_client->clients[i]->socket == client_socket) {
 			client = array_client->clients[i];
