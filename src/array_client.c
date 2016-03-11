@@ -24,12 +24,14 @@ void array_client_free(array_client_t * array_client) {
 	/* free all the clients */
 	for(i = 0; i < array_client->count; i++) {
 		pthread_cancel(array_client->clients[i]->client_thread);
+		pthread_mutex_destroy(&array_client->clients[i]->lock);
 		close(array_client->clients[i]->socket);
 		free(array_client->clients[i]);
 	}
 	/* cleanup the rest of the struct */
 	free(array_client->clients);
 	pthread_mutex_unlock(&array_client->lock);
+	pthread_mutex_destroy(&array_client->lock);
 	free(array_client);
 }
 
@@ -38,7 +40,7 @@ void array_client_free(array_client_t * array_client) {
  */
 int array_client_add(array_client_t * array_client, int client_socket) {
 	client_t * new_client;
-	
+
 	pthread_mutex_lock(&array_client->lock);
 
 	/* Si la tableau est plein, on l'agrandit */
@@ -97,6 +99,7 @@ int array_client_delete(array_client_t * array_client, int client_socket) {
 			client_ind = i;
 		}
 	}
+	pthread_mutex_destroy(&client->lock);
 	free(client);
 
 	array_client_compact(array_client, client_ind, array_client->count);
