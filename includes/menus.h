@@ -5,60 +5,61 @@
 #ifndef MENUS_H
 #define MENUS_H
 
-#include <stdlib.h>
+#include "config.h"
 #include <ncurses.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "config.h"
 
 /*
  * Fonction effectuant une saisie de texte dans une fenêtre ncurses
  */
-void text_input(WINDOW * win, char * message, size_t max_char);
+void text_input(WINDOW *win, char *message, size_t max_char);
 
 /*
  * Fonction nettoyant une fenêtre ncurses
  */
-void clear_window(WINDOW * win);
+void clear_window(WINDOW *win);
 
 /*
  * Fonction affichant un message de multicast dans une fenêtre ncurses
  */
-void print_multicast(WINDOW * win, char * message);
+void print_multicast(WINDOW *win, char *message);
 
 /*
  * Fonction affichant un message dans une fenêtre ncurses
  */
-void print_message(WINDOW * win, char * username, char * message);
+void print_message(WINDOW *win, char *username, char *message);
 
 /*
  * Fonction affichant un message privé dans une fenêtre ncurses
  */
-void print_whisper(WINDOW * win, char * username, char * message);
+void print_whisper(WINDOW *win, char *username, char *message);
 
 /*
- * Fonction affichant un accusé d'envoi d'un message privé dans une fenêtre ncurses
+ * Fonction affichant un accusé d'envoi d'un message privé dans une fenêtre
+ * ncurses
  */
-void print_ack_whisper(WINDOW * win, char * username, char * message);
+void print_ack_whisper(WINDOW *win, char *username, char *message);
 
 /*
  * Fonction demandant la saisie d'un nom d'utilisateur dans une fenêtre ncurses
  */
-void menu_ask_username(WINDOW * win, char * username);
+void menu_ask_username(WINDOW *win, char *username);
 
 /*
  * Fonction demandant la saisie d'un mot de passe dans une fenêtre ncurses
  */
-void menu_ask_password(WINDOW * win, char * password);
+void menu_ask_password(WINDOW *win, char *password);
 
 /*
  * Fonction demandant la saisie d'un message dans une fenêtre ncurses
  */
-void menu_say(WINDOW * win, char * message);
+void menu_say(WINDOW *win, char *message);
 
 /*
  * Fonction demandant la saisie d'un message privé dans une fenêtre ncurses
  */
-void menu_whisper(WINDOW * win, char * destinataire, char * message);
+void menu_whisper(WINDOW *win, char *destinataire, char *message);
 
 #endif
