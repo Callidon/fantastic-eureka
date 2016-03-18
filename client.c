@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
   sockaddr_in adresse_locale;   /* adresse de socket local */
   hostent *ptr_host;            /* info sur une machine hote */
   int socket_descriptor,        /* descripteur de socket */
-      fileDescriptors
-          [2], /* descripteur pour le pipe entre le main process & le thread
-                  d'écoute */
+      fileDescriptors[2], /* descripteur pour le pipe entre le main process & le
+                             thread
+                             d'écoute */
       successful_login = 0; /* Booléen indiquant si l'authentifgication s'est
                                faite avec succès */
   char buffer[MAX_BUFFER_SIZE], /* buffer de réception des messages venant du
@@ -140,6 +140,7 @@ int main(int argc, char **argv) {
 
   /* sélection d'action */
   for (;;) {
+    memset(buffer, 0, MAX_BUFFER_SIZE);
     wprintw(winput, "Tapez le numéro correspondant à l'action désirée :\n");
     wprintw(winput, "1 : Envoyer un message\n2 : Envoyer un message privé\n3 : "
                     "Déconnexion\n");
